@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { LinearProgress } from '@mui/material';
 import { AppContext } from './AppContext';
 
+
+
 function DetailsPage() {
   let { itemModel } = useParams();
   const [itemDetails, setItemDetails] = useState(null);

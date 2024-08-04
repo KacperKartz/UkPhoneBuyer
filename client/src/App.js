@@ -17,7 +17,7 @@ function HomePage() {
 
   //db
   useEffect(() => {
-    fetch('http://localhost:5000/phones')
+    fetch('https://main.d3dgevumkhgn02.amplifyapp.com/phones')
       .then((response) => response.json())
       .then((data) => setData(data))
       .catch((error) => console.error('Error fetching data:', error));
