@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path');
 const app = express()
 const cors = require("cors")
 const dotenv = require("dotenv")
@@ -18,12 +19,10 @@ const pool = mysql.createPool({
     queueLimit: 0
   });
 
-
-  app.use(express.static(path.join(__dirname, 'client/build')));
+  app.use(express.static(path.join(__dirname, '../client/build')));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
   });
-
 
   app.get('/phones', (req, res) => {
     pool.query('SELECT * FROM Phone', (error, results) => {
