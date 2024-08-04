@@ -19,6 +19,11 @@ const pool = mysql.createPool({
   });
 
 
+  app.use(express.static(path.join(__dirname, 'client/build')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
+
 
   app.get('/phones', (req, res) => {
     pool.query('SELECT * FROM Phone', (error, results) => {
