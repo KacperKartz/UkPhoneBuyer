@@ -29,7 +29,7 @@ function DetailsPage() {
 
   console.log()
   useEffect(() => {
-    fetch('http://localhost:3000/phones')
+    fetch('http://localhost:5000/phones')
       .then((response) => response.json())
       .then((data) => setData(data))
       .catch((error) => console.error('Error fetching data:', error));
