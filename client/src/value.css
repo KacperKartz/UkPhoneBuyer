@@ -1,0 +1,122 @@
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 3px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+    color: #333;
+    margin: 0;
+  }
+  
+  .device-details {
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .device-details-2 {
+    padding: 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .device-details h3 {
+    font-size: 1.25rem;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  .device-details h5 {
+    font-size: 1rem;
+    color: #777;
+    margin: 0;
+  }
+  
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .button-submit {
+    padding: 10px;
+    background-color: #71b7e6;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin: auto;
+    width: 90%;
+    margin-bottom: 20px;
+    transition-duration: 0.4s;
+  }
+  
+  button:hover {
+    background-color: #9b59b6;
+    transition-duration: 0.4s;
+  }
+
+  .progress-bar {
+    margin-top: 10px;
+  }
+  
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .loading p {
+    margin-top: 10px;
+    color: #333;
+  }
+
+  #defaultCheck1{
+    width:auto;
+  }
+
+  .form-check-label{
+    margin-top: 12px;
+  }
+
+  .shipOption{
+    display: ruby-text;
+
+  }
+
+  .opBtn{
+    margin: 15px;
+  }
+
+  .list-item{
+    list-style: circle;
+  }
