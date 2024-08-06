@@ -31,8 +31,8 @@ const ShippingDetailsPage = () => {
         condition: deviceInfo.condition,
         estimatedValue: deviceInfo.estimatedValue,
         serialNumber: deviceInfo.serialNumber,
-        accountNumber: deviceInfo.accountNumber,
-        sortCode: deviceInfo.sortCode
+        accountNumber,
+        sortCode
 
       });
       setLoading(false);
