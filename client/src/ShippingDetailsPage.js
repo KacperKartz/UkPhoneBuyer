@@ -10,6 +10,10 @@ const ShippingDetailsPage = () => {
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [sortCode, setsortCode] = useState('');
+   
+
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -26,7 +30,9 @@ const ShippingDetailsPage = () => {
         storage: deviceInfo.storage,
         condition: deviceInfo.condition,
         estimatedValue: deviceInfo.estimatedValue,
-        serialNumber: deviceInfo.serialNumber
+        serialNumber: deviceInfo.serialNumber,
+        accountNumber: deviceInfo.accountNumber,
+        sortCode: deviceInfo.sortCode
 
       });
       setLoading(false);
@@ -88,6 +94,26 @@ const ShippingDetailsPage = () => {
               id="phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="accountNumber">Account Number:</label>
+            <input
+              type="text"
+              id="accountNumber"
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="sortCode">sortCode:</label>
+            <input
+              type="text"
+              id="sortCode"
+              value={sortCode}
+              onChange={(e) => setsortCode(e.target.value)}
               required
             />
           </div>

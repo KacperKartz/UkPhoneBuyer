@@ -79,14 +79,14 @@ process.on('SIGINT', () => {
 // }
 
 app.post('/submit-details', (req, res) => {
-    const { name, email, address, phone, phoneModel, storage, condition, estimatedValue, serialNumber } = req.body;
+    const { name, email, address, phone, phoneModel, storage, condition, estimatedValue, serialNumber, accountNumber, sortCode } = req.body;
 
     const query = `
-        INSERT INTO UserDetails (name, email, address, phone, phone_model, storage, \`condition\`, estimated_value, serialNumber)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO UserDetails (name, email, address, phone, phone_model, storage, \`condition\`, estimated_value, serialNumber, accountnumber, sortcode)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    pool.query(query, [name, email, address, phone, phoneModel, storage, condition, estimatedValue, serialNumber], (error, results) => {
+    pool.query(query, [name, email, address, phone, phoneModel, storage, condition, estimatedValue, serialNumber, accountNumber, sortCode], (error, results) => {
         if (error) {
             console.error('Database query error:', error);
             res.status(500).send('Database error');

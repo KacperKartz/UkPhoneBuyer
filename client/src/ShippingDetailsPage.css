@@ -1,3 +1,8 @@
+html, body {
+  overflow-x: hidden;
+}
+
+
 .container {
     max-width: 600px;
     background-color: rgba(255, 255, 255, 0.8);
@@ -59,3 +64,39 @@
     color: #333;
   }
   
+
+  @media (max-width: 600px) {
+    .container {
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 100%;
+    }
+  
+    .header h1 {
+        font-size: 1.5rem;
+    }
+  
+    .form-group {
+        margin-bottom: 12px;
+    }
+  
+    .form-group input,
+    .form-group textarea {
+        padding: 6px;
+        font-size: 14px;
+    }
+  
+    button {
+        padding: 8px;
+        font-size: 14px;
+    }
+  
+    .progress-bar {
+        margin-top: 8px;
+    }
+  
+    .success-message {
+        font-size: 1rem;
+    }
+}
