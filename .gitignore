@@ -21,3 +21,4 @@ amplifytools.xcconfig
 server/.env
 **.sample
 #amplify-do-not-edit-end
+Server/.env
