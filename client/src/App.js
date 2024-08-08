@@ -17,7 +17,7 @@ function HomePage() {
 
   //db
   useEffect(() => {
-    fetch('https://ukphonebuyer-app-6c6bfb2b0a6b.herokuapp.com/phones')
+    fetch(`${process.env.BACKEND_API}/phones`)
       .then((response) => response.json())
       .then((data) => setData(data))
       .catch((error) => console.error('Error fetching data:', error));

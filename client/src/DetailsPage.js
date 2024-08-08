@@ -31,7 +31,7 @@ function DetailsPage() {
 
   console.log()
   useEffect(() => {
-    fetch('https://ukphonebuyer-app-6c6bfb2b0a6b.herokuapp.com/phones')
+    fetch(`${process.env.BACKEND_API}/phones`)
       .then((response) => response.json())
       .then((data) => setData(data))
       .catch((error) => console.error('Error fetching data:', error));
@@ -78,7 +78,7 @@ function DetailsPage() {
     setLoading(true);
 
       try{
-        const response = await axios.post('https://ukphonebuyer-app-6c6bfb2b0a6b.herokuapp.com/estimate-value',{
+        const response = await axios.post(`${process.env.BACKEND_API}/estimate-value`,{
           phoneModel: itemDetails.model,
           condition,
           storage

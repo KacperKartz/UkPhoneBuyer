@@ -21,7 +21,7 @@ const ShippingDetailsPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`https://ukphonebuyer-app-6c6bfb2b0a6b.herokuapp.com/submit-details`, {
+      await axios.post(`${process.env.BACKEND_API}/submit-details`, {
         name,
         email,
         address,
