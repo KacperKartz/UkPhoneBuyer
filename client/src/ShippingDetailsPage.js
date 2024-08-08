@@ -14,14 +14,16 @@ const ShippingDetailsPage = () => {
   const [sortCode, setsortCode] = useState('');
    
 
+  
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const apiUrl = process.env.BACKEND_API;
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${process.env.BACKEND_API}/submit-details`, {
+      await axios.post(`${apiUrl}/submit-details`, {
         name,
         email,
         address,
