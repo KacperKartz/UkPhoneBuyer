@@ -6,6 +6,8 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 //import { data } from './data.js';
 import DetailsPage from './DetailsPage';
 import ShippingDetailsPage from './ShippingDetailsPage';
+import AdminLogin from './adminLogin';
+import AdminPage from './admin.js';
 
 function HomePage() {
   const [search, setSearch] = useState('');
@@ -94,6 +96,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/details/:itemModel" element={<DetailsPage />} />
         <Route path='/shipping-details' element = {<ShippingDetailsPage />} />
+        <Route  path='/adminlogin' element={<AdminLogin/>} />
+        <Route  path='/adminpage' element={<AdminPage/>} />
       </Routes>
     </Router>
   );

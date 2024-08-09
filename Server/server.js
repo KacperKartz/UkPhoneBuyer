@@ -2,12 +2,17 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const session = require('express-session');
+const jwt = require('jsonwebtoken');
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
+
+
 
 /// PHONE DATABASE
 const pool = mysql.createPool({
@@ -24,6 +29,65 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
 
+app.use(session({
+    secret: `${process.env.SECRECTKEY}`, 
+    resave: false,                
+    saveUninitialized: true,     
+    ///cookie: { secure: false }     
+  }));
+
+const USERNAME = process.env.ADMINUSERNAME;
+const PASSWORD_HASH = process.env.PASSWORD_HASH;
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
+
+
+app.post('/adminlogin', (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username === USERNAME && bcrypt.compareSync(password, PASSWORD_HASH)) {
+        req.session.user = username; 
+
+        // Generate JWT token
+        const accessToken = jwt.sign(
+          { username: username, role: 'admin' }, /
+          process.env.ACCESS_TOKEN_SECRET,
+          { expiresIn: '1h' } 
+        );
+    
+        res.json({ success: true, accessToken }); /
+      } else {
+        res.status(401).json({ success: false, message: 'Authentication failed' });
+      }
+  });
+
+  function isAuthenticated(req, res, next) {
+    if (req.session.user === USERNAME) {
+      return next();
+    } else {
+      res.status(403).json({ message: 'Unauthorized' });
+    }
+  }
+
+  const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (token == null) return res.sendStatus(401);
+    
+    jwt.verify(token, ACCESS_TOKEN_SECRET, (err, user) => {
+      if (err) return res.sendStatus(403); 
+      req.user = user;
+      next();
+    });
+  };
+  
+
+  app.get('/adminpage', isAuthenticated, (req, res) => {
+    res.json({ message: 'Welcome to the admin interface' });
+  });
+  
+
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
@@ -38,6 +102,8 @@ app.get('/phones', (req, res) => {
         res.json(results);
     });
 });
+
+
 
 app.get('/phone/:id/baseprice', (req, res) => {
     const { id } = req.params;
@@ -94,6 +160,18 @@ app.post('/submit-details', (req, res) => {
         }
         res.status(201).send('Details submitted successfully');
     });
+});
+
+
+
+app.get('/users', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM UserDetails');
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ message: 'Error fetching data' });
+    }
 });
 
 app.post('/estimate-value', (req, res) => {

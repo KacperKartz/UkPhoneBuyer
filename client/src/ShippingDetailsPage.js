@@ -49,7 +49,11 @@ const ShippingDetailsPage = () => {
       errors.sortCode = 'Sort code must be 6 digits in the format XX-XX-XX';
     }
   
-    console.log(errors);
+    if (!isValid) {
+      let errorMessages = Object.values(errors).join('\n');
+      alert(errorMessages);
+    }
+
     return isValid;
   };
 
