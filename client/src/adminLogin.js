@@ -12,7 +12,7 @@ const AdminLogin = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`/adminlogin`, { username, password });
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_API}/adminlogin`, { username, password });
       if (response.data.success) {
         localStorage.setItem('accessToken', response.data.accessToken);
         navigate(`/adminpage`);
