@@ -15,7 +15,7 @@ const AdminPage = () => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('accessToken');
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_API}${process.env.REACT_APP_ENDPOINT}`, {
+        const response = await axios.get(`${process.env.REACT_APP_ENDPOINT}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

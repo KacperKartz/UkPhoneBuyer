@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -49,12 +49,12 @@ app.post('/adminlogin', (req, res) => {
 
         // Generate JWT token
         const accessToken = jwt.sign(
-          { username: username, role: 'admin' }, /
+          { username: username, role: 'admin' }, 
           process.env.ACCESS_TOKEN_SECRET,
           { expiresIn: '1h' } 
         );
     
-        res.json({ success: true, accessToken }); /
+        res.json({ success: true, accessToken }); 
       } else {
         res.status(401).json({ success: false, message: 'Authentication failed' });
       }
@@ -94,6 +94,17 @@ app.get('/', (req, res) => {
 
 app.get('/phones', (req, res) => {
     pool.query('SELECT * FROM Phone', (error, results) => {
+        if (error) {
+            console.error('Database query error:', error);
+            res.status(500).send('Database error');
+            return;
+        }
+        res.json(results);
+    });
+});
+
+app.get('/users',authenticateToken, (req, res) => {
+    pool.query('SELECT * FROM userDetails', (error, results) => {
         if (error) {
             console.error('Database query error:', error);
             res.status(500).send('Database error');
@@ -164,15 +175,8 @@ app.post('/submit-details', (req, res) => {
 
 
 
-app.get('/users', authenticateToken, async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM UserDetails');
-        res.json(rows);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).json({ message: 'Error fetching data' });
-    }
-});
+
+
 
 app.post('/estimate-value', (req, res) => {
     const { model, storage, condition } = req.body;
