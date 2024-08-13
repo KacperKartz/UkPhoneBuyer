@@ -115,6 +115,7 @@ const ShippingDetailsPage = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              placeholder='Please enter your full name'
             />
           </div>
           <div className="form-group">
@@ -125,6 +126,7 @@ const ShippingDetailsPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder='Please enter your Email address'
             />
           </div>
           <div className="form-group">
@@ -134,6 +136,7 @@ const ShippingDetailsPage = () => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               required
+              placeholder='Please enter your address'
             ></textarea>
           </div>
           <div className="form-group">
@@ -144,6 +147,7 @@ const ShippingDetailsPage = () => {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
+              placeholder='00000000000'
             />
           </div>
           <div className="form-group">
@@ -154,6 +158,7 @@ const ShippingDetailsPage = () => {
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
               required
+            placeholder='00000000'
             />
           </div>
           <div className="form-group">
@@ -164,17 +169,27 @@ const ShippingDetailsPage = () => {
               value={sortCode}
               onChange={(e) => setsortCode(e.target.value)}
               required
+              placeholder='00-00-00'
             />
           </div>
           {loading ? (
             <LinearProgress className="progress-bar" />
           ) : (
-            <button type="submit">Submit</button>
+            <button type="submit" className="submitbtn">Submit</button>
           )}
         </form>
       ) : (
         <div className="success-message">
-          <h3>Details submitted successfully! We will contact you soon.</h3>
+          <h3>Success! Your Details Have Been Submitted.</h3>
+          <br></br>
+          <h5>
+            Thank you for submitting your phone's details. We've received your information, and a confirmation email has been sent to you with the next steps.
+          </h5>
+          <br></br>
+          <p>
+            If you have selected to post it yourself please post to this address:
+          TheUKPhoneBuyer Unit 6B Park Farm Business Centre IP286TS Bury St Edmunds
+          </p>
         </div>
       )}
     </div>

@@ -41,7 +41,7 @@ html, body {
     border-radius: 4px;
   }
   
-  button {
+  .submitbtn {
     padding: 10px;
     background-color: #71b7e6;
     color: #fff;
@@ -51,7 +51,7 @@ html, body {
     font-size: 16px;
   }
   
-  button:hover {
+  .submitbtn:hover {
     background-color: #9b59b6;
   }
   

@@ -1,26 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Table from 'react-bootstrap/Table';
+import Button from 'react-bootstrap/Button';
+
 const AdminPage = () => {
-  const [message, setMessage] = useState('');
-  const [data, setData] = useState([]);
+  const [userData, setUserData] = useState([]);
+  const [productData, setProductData] = useState([]);
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editedPrice, setEditedPrice] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const navigate = useNavigate();
-
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_API}/users`, {
+        const token = sessionStorage.getItem('accessToken');
+
+        // Fetch user data
+        const userResponse = await axios.get(`${process.env.REACT_APP_BACKEND_API}/users`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        setData(response.data);
+        setUserData(userResponse.data);
+
+        // Fetch product data
+        const productResponse = await axios.get(`http://localhost:5000/phones`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        setProductData(productResponse.data);
       } catch (error) {
         setError(error);
         console.error('Error fetching data:', error);
@@ -32,6 +42,34 @@ const AdminPage = () => {
     fetchData();
   }, []);
 
+  const handlePriceChange = (e) => {
+    setEditedPrice(e.target.value);
+  };
+
+  const handleEditPrice = (product) => {
+    setEditingProductId(product.id);
+    setEditedPrice(product.price);
+  };
+
+  const handleSavePrice = async () => {
+    try {
+      const token = sessionStorage.getItem('accessToken');
+      await axios.put(`http://localhost:5000/phones/${editingProductId}`, { price: editedPrice }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setProductData(productData.map(product => 
+        product.id === editingProductId ? { ...product, price: editedPrice } : product
+      ));
+      setEditingProductId(null);
+      setEditedPrice('');
+    } catch (error) {
+      setError(error);
+      console.error('Error updating price:', error);
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -39,9 +77,10 @@ const AdminPage = () => {
   if (error) {
     return <p>Error: {error.message}</p>;
   }
+
   return (
     <div>
-      <h2>{message}</h2>
+      <h2>User Data</h2>
       <Table striped bordered hover className='shadow'>
         <thead>
           <tr>
@@ -60,7 +99,7 @@ const AdminPage = () => {
           </tr>
         </thead>
         <tbody>
-          {data.map((user) => (
+          {userData.map((user) => (
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.name}</td>
@@ -77,7 +116,51 @@ const AdminPage = () => {
             </tr>
           ))}
         </tbody>
-        </Table>
+      </Table>
+
+      <h2>Product Data</h2>
+      <Table striped bordered hover className='shadow'>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {productData.map((product) => (
+            <tr key={product.id}>
+              <td>{product.id}</td>
+              <td>{product.brand}</td>
+              <td>{product.model}</td>
+              <td>
+                {editingProductId === product.id ? (
+                  <input 
+                    type="number" 
+                    value={editedPrice} 
+                    onChange={handlePriceChange} 
+                    step="0.01"
+                  />
+                ) : (
+                  product.price
+                )}
+              </td>
+              <td>
+                {editingProductId === product.id ? (
+                  <>
+                    <Button onClick={handleSavePrice}>Save</Button>
+                    <Button onClick={() => setEditingProductId(null)}>Cancel</Button>
+                  </>
+                ) : (
+                  <Button onClick={() => handleEditPrice(product)}>Edit Price</Button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     </div>
   );
 };

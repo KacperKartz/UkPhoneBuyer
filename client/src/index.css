@@ -1,5 +1,12 @@
+html, body, #root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+
 body {
-  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+  background: linear-gradient(135deg, #191e58, #3641ba);
   background-size: 500% 500%;
   animation: gradientAnimation 10s ease infinite;
   margin: 0;
@@ -25,6 +32,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
 
 
 body {
@@ -56,7 +64,7 @@ body {
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-top: 0px;
-  margin-bottom: 10px;
+
 }
 
 .search-input {
@@ -84,8 +92,14 @@ body {
 }
 
 
+.table{
+  max-width: 60vw;
+}
 
 @media (max-width: 767px) {
+
+
+
   .container {
     padding: 10px;
   }
@@ -129,5 +143,9 @@ body {
   .search-container{
     max-width: 30rem;
     max-height: 3.4rem;
+  }
+
+  .table{
+    max-width: 100%;
   }
 }

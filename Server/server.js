@@ -132,6 +132,31 @@ app.get('/phone/:id/baseprice', (req, res) => {
     });
 });
 
+app.put('/phones/:id', authenticateToken, (req, res) => {
+    const productId = parseInt(req.params.id, 10);
+    const { price } = req.body;
+
+    if (!price || isNaN(price)) {
+        return res.status(400).json({ message: 'Invalid price' });
+    }
+
+    // Update the price in the database
+    const query = 'UPDATE Phone SET price = ? WHERE id = ?';
+    pool.query(query, [price, productId], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error);
+            res.status(500).send('Database error');
+            return;
+        }
+        if (results.affectedRows === 0) {
+            res.status(404).send('Product not found');
+            return;
+        }
+        res.json({ success: true, message: 'Price updated successfully' });
+    });
+});
+
+
 process.on('SIGINT', () => {
     pool.end((err) => {
         if (err) {
@@ -176,45 +201,75 @@ app.post('/submit-details', (req, res) => {
 
 
 
-
+function getModelPrice(modelName, callback) {
+    pool.query('SELECT price FROM Phone WHERE model = ?', [modelName], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error);
+            return callback(new Error('Database query error'));
+        }
+        
+        if (results.length > 0) {
+            return callback(null, results[0].price);
+        } else {
+            console.warn(`No price found for model: ${modelName}`);
+            return callback(null, null);  // Returning null if no price is found
+        }
+    });
+}
 
 app.post('/estimate-value', (req, res) => {
-    const { model, storage, condition } = req.body;
+    const { phoneModel, storage, condition } = req.body;
 
-    let basePrice = 100;
+    //console.log('Model received:', phoneModel);
 
-    switch (storage) {
-        case '64GB':
-            basePrice = basePrice;
-            break;
-        case '128GB':
-            basePrice += 50;
-            break;
-        case '256GB':
-            basePrice += 100;
-            break;
-        case '512GB':
-            basePrice += 150;
-            break;
-    }
+    getModelPrice(phoneModel, (err, price) => {
+        if (err) {
+            console.error('Error fetching model price:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        if (price === null) {
+            return res.status(404).json({ error: `Model ${phoneModel} not found.` });
+        }
 
-    switch (condition) {
-        case 'poor':
-            basePrice = basePrice;
-            break;
-        case 'fair':
-            basePrice *= 1.05;
-            break;
-        case 'good':
-            basePrice *= 1.1;
-            break;
-        case 'excellent':
-            basePrice *= 1.2;
-            break;
-    }
+        let basePrice = price;
 
-    res.json({ estimatedValue: basePrice.toFixed(2) });
+        // Adjust price based on storage
+        switch (storage) {
+            case '64GB':
+                basePrice = basePrice;
+                break;
+            case '128GB':
+                basePrice += 50;
+                break;
+            case '256GB':
+                basePrice += 100;
+                break;
+            case '512GB':
+                basePrice += 150;
+                break;
+        }
+
+        // Adjust price based on condition
+        switch (condition) {
+            case 'poor':
+                basePrice = basePrice;
+                break;
+            case 'fair':
+                basePrice *= 1.05;
+                break;
+            case 'good':
+                basePrice *= 1.1;
+                break;
+            case 'excellent':
+                basePrice *= 1.2;
+                break;
+        }
+
+        res.json({ estimatedValue: basePrice });
+    });
 });
+
+
 
 app.listen(port, () => {
     console.log(`Server started on http://localhost:${port}`);

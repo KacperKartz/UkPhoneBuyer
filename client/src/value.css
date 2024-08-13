@@ -79,7 +79,7 @@
     transition-duration: 0.4s;
   }
   
-  button:hover {
+  .button-submit:hover {
     background-color: #9b59b6;
     transition-duration: 0.4s;
   }

@@ -14,7 +14,7 @@ const AdminLogin = () => {
     try {
       const response = await axios.post(`/adminlogin`, { username, password });
       if (response.data.success) {
-        localStorage.setItem('accessToken', response.data.accessToken);
+        sessionStorage.setItem('accessToken', response.data.accessToken);
         navigate(`/adminpage`);
       } else {
         setError('Invalid username or password');
