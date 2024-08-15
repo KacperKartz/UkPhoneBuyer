@@ -9,6 +9,7 @@ import ShippingDetailsPage from './ShippingDetailsPage';
 import AdminLogin from './adminLogin';
 import AdminPage from './admin.js';
 import Layout from './Layout.js';
+import PhonePage from './phonePage.js'
 
 function HomePage() {
   const [search, setSearch] = useState('');
@@ -37,6 +38,9 @@ function HomePage() {
   };
 
 
+  const iPhoneClick = (e) => {
+    navigate(`/PhonePage`)
+  }
 
 
   // useEffect(() => {
@@ -54,12 +58,14 @@ function HomePage() {
 
   return (
     <div className="app">
+      <div className='intro-header shadow'>
+
       <div className="title-container"  ref={tableRef}>
         <h2> </h2>
-        <h1 className="text-light">Sell your phone today</h1>
+        <h1 className="text-light">Sell your device today</h1>
         <p className='text-white'>Make the most out of your old device and <br></br> make some money whilst you're at it</p>
       </div>
-      <div className="search-container">
+      <div className="search-container shadow ">
         <input
           type="text"
           className="search-input"
@@ -68,6 +74,10 @@ function HomePage() {
         />
         <button className="search-button">Search</button>
       </div>
+
+        
+      </div>
+
 
 
       {showTable && (
@@ -100,7 +110,7 @@ function HomePage() {
 
 <div className="card-group shadow">
       {/* iPhone Card */}
-      <div className="card order-1 order-lg-2 shadow">
+      <div className="card order-1 order-lg-2 shadow" onClick={iPhoneClick}>
         <img
           src="https://ee.co.uk/medias/iphone-13-5g-pink-desktop-detail-1-WebP-Format-488?context=bWFzdGVyfHJvb3R8ODIyMHxpbWFnZS93ZWJwfHN5cy1tYXN0ZXIvcm9vdC9oODUvaGVhLzk4ODg4ODYyNTk3NDIvaXBob25lLTEzLTVnLXBpbmstZGVza3RvcC1kZXRhaWwtMV9XZWJQLUZvcm1hdC00ODh8YmQ5NmZmZTQyMjgwNmE3NTE3ZTczMzQ4ZmEzMWE1YTcxZTYzNjk5N2FiNTljNmZkYmVlZWQ3NmI5YjViZWFkNw"
           className="card-img-top"
@@ -195,6 +205,7 @@ function App() {
         <Route path="/" element={<Layout />} >
         <Route index element={<HomePage />} />
         <Route path="/details/:itemModel" element={<DetailsPage />} />
+        <Route path="/phonePage" element={<PhonePage />} />
         <Route path='/shipping-details' element = {<ShippingDetailsPage />} />
         </Route>
         <Route  path='/adminlogin' element={<AdminLogin/>} />

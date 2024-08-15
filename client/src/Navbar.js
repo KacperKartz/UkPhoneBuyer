@@ -53,7 +53,7 @@ function Navbar() {
       {/* Trustpilot Section */}
       <div className="trustpilot-navbar bg-black">
         <div className="container-fluid d-flex justify-content-between align-items-center">
-          <a className="navbar-brand" href="https://uk.trustpilot.com/review/theukphonefixer.co.uk">
+          <a className="navbar-brandtp" href="https://uk.trustpilot.com/review/theukphonefixer.co.uk">
             <img src="https://cdn.trustpilot.net/brand-assets/4.3.0/logo-white.svg" alt="trustPilotLogo" className="tpLogo" height="30" />
           </a>
           <img src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-4.5.svg" alt="trustPilotStars" className="stars" height="30" />

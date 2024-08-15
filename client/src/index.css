@@ -6,7 +6,7 @@ html, body, #root {
 
 
 body {
-  background: linear-gradient(135deg, #191e58, #3641ba);
+  background: linear-gradient(135deg, #2d3697, #252C7F);
   background-size: 500% 500%;
   animation: gradientAnimation 10s ease infinite;
   margin: 0;
@@ -63,7 +63,10 @@ body {
   padding: 10px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: auto;
   margin-top: 0px;
+  max-width: 30%;
+  
 
 }
 
@@ -141,7 +144,7 @@ body {
   }
 
   .search-container{
-    max-width: 30rem;
+    max-width: 20rem;
     max-height: 3.4rem;
   }
 

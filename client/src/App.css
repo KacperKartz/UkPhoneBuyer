@@ -1,21 +1,30 @@
 .card{
-    background-color:rgba(255, 255, 255, 0.801);
+    background-color:rgb(255, 255, 255);
     border-width: 0px;
-    border-radius: 10px;
-    transition: transform 0.3s ease-in-out;
-    scale: 0.9;
+    border-radius: 10px !important;
+    transition: 0.2s ease-in-out;
+    scale: 0.95;
     color: #141414;
     
   }
   
+  .intro-header{
+    width: 100%;
+    padding-top: 40px;
+    padding-bottom: 100px;
+    background: linear-gradient(135deg, #7e86df, #252C7F);
+    background-size: 100% 100%;
+  }
 
 .card-group{
-    margin-top: 15px;
+    margin-top: 6vh;
+    max-width: 60%;
 }
 
 
 .card:hover{
     transform: scale(1.05);
+    filter: drop-shadow(0px 0px 13px #86c8e4);
 }
 
 .device-image{
@@ -29,6 +38,17 @@
 }
 
 @media (max-width: 767px) {
+    .card{
+        background-color:rgb(255, 255, 255);
+        border-width: 0px;
+        border-radius: 10px;
+        transition: transform 0.3s ease-in-out;
+        scale: 0.9;
+        color: #141414;
+        
+      }
+      
+    
 
     .specialTable{
       max-width: fit-content;

@@ -40,6 +40,7 @@ const USERNAME = process.env.ADMINUSERNAME;
 const PASSWORD_HASH = process.env.PASSWORD_HASH;
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
+app.use('/phones', express.static(path.join(__dirname, 'public/phones')));
 
 app.post('/adminlogin', (req, res) => {
     const { username, password } = req.body;
@@ -265,7 +266,7 @@ app.post('/estimate-value', (req, res) => {
                 break;
         }
 
-        res.json({ estimatedValue: basePrice });
+        res.json({ estimatedValue: parseInt(basePrice).toFixed(2) });
     });
 });
 
