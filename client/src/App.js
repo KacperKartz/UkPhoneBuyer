@@ -75,38 +75,38 @@ function HomePage() {
         <button className="search-button">Search</button>
       </div>
 
+      {showTable && (
+    
+
+    <Table striped bordered hover className='shadow specialTable'>
+      <thead>
+        <tr>
+        </tr>
+      </thead>
+      <tbody>
+        {data.filter((item) => {
+        const searchLowerCase = search.toLowerCase();
+        const modelLowerCase = item.model.toLowerCase();
+        const brandLowerCase = item.brand.toLowerCase();
+        return searchLowerCase === '' ? true : modelLowerCase.includes(searchLowerCase) || brandLowerCase.includes(searchLowerCase);
+
+        }).map((item) => (
+          <tr key={item.id}>
+            <td>{item.brand}</td>
+            <td>{item.model}</td>
+            <td>
+              <button className="btn btn-outline-primary" onClick={() => handleButtonClick(item.model)}>Select</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+          )}
         
       </div>
 
 
 
-      {showTable && (
-    
-
-      <Table striped bordered hover className='shadow specialTable'>
-        <thead>
-          <tr>
-          </tr>
-        </thead>
-        <tbody>
-          {data.filter((item) => {
-          const searchLowerCase = search.toLowerCase();
-          const modelLowerCase = item.model.toLowerCase();
-          const brandLowerCase = item.brand.toLowerCase();
-          return searchLowerCase === '' ? true : modelLowerCase.includes(searchLowerCase) || brandLowerCase.includes(searchLowerCase);
-
-          }).map((item) => (
-            <tr key={item.id}>
-              <td>{item.brand}</td>
-              <td>{item.model}</td>
-              <td>
-                <button className="btn btn-outline-primary" onClick={() => handleButtonClick(item.model)}>Select</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-            )}
 
 <div className="card-group shadow">
       {/* iPhone Card */}

@@ -96,7 +96,8 @@ body {
 
 
 .table{
-  max-width: 60vw;
+  max-width: 40vw;
+  margin: auto;
 }
 
 @media (max-width: 767px) {
