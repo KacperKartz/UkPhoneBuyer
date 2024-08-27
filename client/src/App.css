@@ -14,7 +14,46 @@
     padding-bottom: 100px;
     background: linear-gradient(135deg, #7e86df, #252C7F);
     background-size: 100% 100%;
+    position: relative
   }
+
+
+  .cat-h-text{
+    padding: 10px;
+  }
+  .cat-p{
+    max-width: 50%;
+    margin: auto;
+    
+  }
+
+.card-group{
+  display: ruby ;
+}
+  
+.img-fluid{
+  width: 400px;
+  height: 400px;
+}
+
+.intro-title {
+  position: absolute;
+  margin:auto;
+  left: 50%;
+  transform: translate(-50%, -150%);
+  color: white;
+  cursor: pointer;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  transition: 0.4s;
+  padding: 10vh;
+  border-radius: 10px;
+  filter: blur(10px) drop-shadow(0px 10px 36px #ff0000);
+}
+
+.intro-title:hover{
+  transform: translate(-50%, -160%);
+  filter: blur(0px)drop-shadow(0px 10px 45px #ffffff);
+}
 
 .card-group{
     margin-top: 6vh;
@@ -22,7 +61,15 @@
 }
 
 
+
+
+
+
 .card:hover{
+    transform: scale(1.05);
+    filter: drop-shadow(0px 0px 13px #86c8e4);
+}
+.phone-card:hover{
     transform: scale(1.05);
     filter: drop-shadow(0px 0px 13px #86c8e4);
 }
@@ -37,6 +84,9 @@
     margin: auto;
 }
 
+
+
+
 @media (max-width: 767px) {
     .card{
         background-color:rgb(255, 255, 255);
@@ -47,6 +97,17 @@
         color: #141414;
         
       }
+      
+      .phone-card{
+        background-color:rgb(255, 255, 255);
+        border-width: 0px;
+        border-radius: 10px;
+        transition: transform 0.3s ease-in-out;
+        scale: 0.8;
+        color: #141414;
+        margin:1px;
+      }
+      
       
     
 

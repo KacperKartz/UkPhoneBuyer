@@ -1,21 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './catalogue.css';
 import { useNavigate } from 'react-router-dom';
+import PhoneGrid from './PhoneGrid';
 
-const PhoneCard = ({ phone, navigate }) => {
-    let phoneimg = `/phones/${phone.url}`;
-    const handleButtonClick = () => {
-        console.log("clicked", phone.model);
-        navigate(`/details/${phone.model}`);
-    };
 
-    return (
-        <div className="card shadow" onClick={handleButtonClick}>
-            <img src={phoneimg} alt={phone.name} className="card-image" />
-            <h3 className="card-title">{phone.model}</h3>
-        </div>
-    );
-};
 
 const PhonePage = () => {
     const navigate = useNavigate();
@@ -64,11 +52,7 @@ const PhonePage = () => {
                         Sort Year ↓
                     </button>
                 </div>
-                <div className="phone-grid shadow">
-                    {data.map((phone) => (
-                        <PhoneCard key={phone.id} phone={phone} navigate={navigate} />
-                    ))}
-                </div>
+                <PhoneGrid data={data} isSliding={false} />
             </div>
         </div>
     );

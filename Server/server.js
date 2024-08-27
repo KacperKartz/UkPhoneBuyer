@@ -7,11 +7,26 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+app.use(express.json());
+
+
+
+
+const transporter = nodemailer.createTransport({
+    service: 'Gmail', // You can use other email services
+    host: "smtp.gmail.com",
+    port: 587,
+    auth: {
+        user: 'Buyback@theukphonefixer.co.uk', 
+        pass: process.env.EMAIL_PASSWORD   
+    }
+});
 
 
 /// PHONE DATABASE
@@ -39,6 +54,35 @@ app.use(session({
 const USERNAME = process.env.ADMINUSERNAME;
 const PASSWORD_HASH = process.env.PASSWORD_HASH;
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
+ 
+
+
+
+
+app.post('/send-email', (req, res) => {
+    const { to, subject, text } = req.body;
+
+    const mailOptions = {
+        from: 'kacperkartz@gmail.com',
+        to: to,
+        subject: subject,
+        text: text
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log(error);
+            res.status(500).send('Error sending email');
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.status(200).send('Email sent');
+        }
+    });
+});
+
+
+
+
 
 app.use('/phones', express.static(path.join(__dirname, 'public/phones')));
 
