@@ -17,7 +17,7 @@ const PhoneCard = ({ phone, navigate, isSliding }) => {
     );
 };
 
-const PhoneGrid = ({ data, isSliding }) => {
+const PhoneGrid = ({ data, isSliding, offsetClass }) => {
     const navigate = useNavigate();
     const containerRef = useRef(null);
 
@@ -44,7 +44,7 @@ const PhoneGrid = ({ data, isSliding }) => {
     }, [isSliding]);
 
     return (
-        <div ref={containerRef} className={`${isSliding ? "phone-slider" : "phone-grid"}`}>
+        <div ref={containerRef} className={`${isSliding ? `phone-slider ${offsetClass}` : "phone-grid"}`}>
             {items.map((phone, index) => (
                 <PhoneCard key={index} phone={phone} navigate={navigate} isSliding={isSliding} />
             ))}

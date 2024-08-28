@@ -57,7 +57,11 @@ function HomePage() {
         <img src='/phones/kindpng_2768230.png' className=''></img>
 
       <div className='sliderContainer'>
-      <PhoneGrid  data={data} isSliding={true} />
+      <PhoneGrid  data={data} isSliding={true} offsetClass={"offset-1"} />
+    </div>
+
+      <div className='sliderContainer'>
+      <PhoneGrid  data={data} isSliding={true} offsetClass={"offset-2"} />
     </div>
       <div className="title-container"  ref={tableRef}>
         <h2> </h2>
