@@ -22,7 +22,7 @@ const PhoneGrid = ({ data, isSliding, offsetClass }) => {
     const containerRef = useRef(null);
 
     // Create a duplicate of the items to achieve infinite scrolling
-    const items = [...data, ...data];
+    const items = [...data, ...data,];
 
     useEffect(() => {
         const container = containerRef.current;

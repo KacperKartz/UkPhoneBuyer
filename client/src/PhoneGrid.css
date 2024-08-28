@@ -1,6 +1,6 @@
 /* Container for the entire slider */
 .phone-container {
-  max-width: 100%;
+
   overflow: hidden; /* Hide overflowing content */
   white-space: nowrap; /* Prevent wrapping */
   position: relative;
@@ -11,7 +11,7 @@
   display: flex;
   white-space: nowrap;
   will-change: transform;
-  animation: scroll 120s linear infinite; /* Adjust duration for scroll speed */
+  animation: scroll 60s linear infinite; /* Adjust duration for scroll speed */
 }
 
 /* Ensures the slider remains flexible and maintains the scroll effect */
@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
-
+  width: 100%;
 }
 
 .phone-slider.offset-1 {
@@ -27,7 +27,8 @@
 }
 
 .phone-slider.offset-2 {
-  animation-delay: -15s; /* 5-second delay for the second slider */
+  animation-delay: -5s; 
+
 }
   
 /* Standard grid layout for non-sliding mode */

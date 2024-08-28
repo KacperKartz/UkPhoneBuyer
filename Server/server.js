@@ -56,14 +56,14 @@ const PASSWORD_HASH = process.env.PASSWORD_HASH;
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
  
 
-
+///////// MAILING
 
 
 app.post('/send-email', (req, res) => {
     const { to, subject, text } = req.body;
 
     const mailOptions = {
-        from: 'kacperkartz@gmail.com',
+        from: 'Buyback@theukphonefixer.co.uk',
         to: to,
         subject: subject,
         text: text
@@ -265,7 +265,7 @@ function getModelPrice(modelName, callback) {
 app.post('/estimate-value', (req, res) => {
     const { phoneModel, storage, condition } = req.body;
 
-    //console.log('Model received:', phoneModel);
+    console.log(`Received phoneModel: ${phoneModel}, storage: ${storage}, condition: ${condition}`);
 
     getModelPrice(phoneModel, (err, price) => {
         if (err) {
@@ -276,12 +276,11 @@ app.post('/estimate-value', (req, res) => {
             return res.status(404).json({ error: `Model ${phoneModel} not found.` });
         }
 
-        let basePrice = price;
+        let basePrice = parseFloat(price);
 
         // Adjust price based on storage
         switch (storage) {
             case '64GB':
-                basePrice = basePrice;
                 break;
             case '128GB':
                 basePrice += 50;
@@ -292,12 +291,14 @@ app.post('/estimate-value', (req, res) => {
             case '512GB':
                 basePrice += 150;
                 break;
+            default:
+                console.error(`Unknown storage option: ${storage}`);
+                return res.status(400).json({ error: 'Invalid storage option' });
         }
 
         // Adjust price based on condition
         switch (condition) {
             case 'poor':
-                basePrice = basePrice;
                 break;
             case 'fair':
                 basePrice *= 1.05;
@@ -308,12 +309,14 @@ app.post('/estimate-value', (req, res) => {
             case 'excellent':
                 basePrice *= 1.2;
                 break;
+            default:
+                console.error(`Unknown condition: ${condition}`);
+                return res.status(400).json({ error: 'Invalid condition' });
         }
 
-        res.json({ estimatedValue: parseInt(basePrice).toFixed(2) });
+        res.json({ estimatedValue: basePrice.toFixed(2) });
     });
 });
-
 
 
 app.listen(port, () => {

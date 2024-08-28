@@ -120,7 +120,7 @@ function DetailsPage() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="storage" className='fw-bold'>Storage</label>
+        <label htmlFor="storage" className='fw-bold'>Storage:</label>
         <select
           id="storage"
           value={storage}

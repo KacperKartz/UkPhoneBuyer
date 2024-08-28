@@ -81,6 +81,18 @@ const ShippingDetailsPage = () => {
           accountNumber,
           sortCode
         });
+
+          try{
+            await axios.post(`http://localhost:5000/send-email  `,{
+              "to": email,
+              "subject": "Test Email",
+              "text": "This is a test email."
+            })
+          }
+          catch{
+            console.error("Failed to send mail")
+          }
+
         setLoading(false);
         setSubmitted(true);
       } catch (error) {
@@ -90,6 +102,8 @@ const ShippingDetailsPage = () => {
     } else {
       console.error('Form validation failed');
     }
+
+
   };
   
 
