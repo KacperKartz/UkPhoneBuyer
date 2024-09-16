@@ -1,24 +1,20 @@
-import React, { useState, useContext  } from 'react';
+import React, { useState, useContext } from 'react';
 import './ShippingDetailsPage.css'; 
 import axios from 'axios';
 import { LinearProgress } from '@mui/material';
-import { AppContext, AppProvider } from './AppContext';
+import { AppContext } from './AppContext';
 
 const ShippingDetailsPage = () => {
-  const { deviceInfo, setUserInfo } = useContext(AppContext);
+  const { deviceInfo, setUserInfo } = useContext(AppContext); // Assuming deviceInfo is now an array of devices
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  const [sortCode, setsortCode] = useState('');
-   
-
+  const [sortCode, setSortCode] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-
-
 
   const validateForm = () => {
     let isValid = true;
@@ -42,11 +38,11 @@ const ShippingDetailsPage = () => {
     }
     if (!accountNumber.match(/^\d{8}$/)) {
       isValid = false;
-      errors.accountNumber = 'Account number must be 10 digits';
+      errors.accountNumber = 'Account number must be 8 digits';
     }
     if (!sortCode.match(/^\d{2}-\d{2}-\d{2}$/)) {
       isValid = false;
-      errors.sortCode = 'Sort code must be 6 digits in the format XX-XX-XX';
+      errors.sortCode = 'Sort code must be in the format XX-XX-XX';
     }
   
     if (!isValid) {
@@ -57,18 +53,14 @@ const ShippingDetailsPage = () => {
     return isValid;
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Debug: Check if the form is validated properly
-    const isFormValid = validateForm();
-    console.log('Form validation result:', isFormValid);
-  
-    if(isFormValid) {
+
+    if (validateForm()) {
       setLoading(true);
       try {
-        await axios.post(`${process.env.REACT_APP_BACKEND_API}/submit-details`, {
+        // Send the form and multiple devices' data to the backend
+        await axios.post(`http://localhost:5000/submit-details`, {
           name,
           email,
           address,
@@ -82,16 +74,15 @@ const ShippingDetailsPage = () => {
           sortCode
         });
 
-          try{
-            await axios.post(`http://localhost:5000/send-email  `,{
-              "to": email,
-              "subject": "Test Email",
-              "text": "This is a test email."
-            })
-          }
-          catch{
-            console.error("Failed to send mail")
-          }
+        try {
+          await axios.post(`http://localhost:5000/send-email`, {
+            "to": email,
+            "subject": "Device Submission Confirmation",
+            "text": "Thank you for submitting your devices. We will process them soon."
+          });
+        } catch (error) {
+          console.error("Failed to send confirmation email");
+        }
 
         setLoading(false);
         setSubmitted(true);
@@ -99,28 +90,38 @@ const ShippingDetailsPage = () => {
         console.error('Error submitting details', error);
         setLoading(false);
       }
-    } else {
-      console.error('Form validation failed');
     }
-
-
   };
-  
 
   return (
     <div className="container">
       {!submitted ? (
         <form onSubmit={handleSubmit} className="shipping-form">
-      <div className="header">
-        <h1>Customer Details</h1>
+          <div className="header">
+            <h1>Customer Details</h1>
+          </div>
+
+          <div className="device-info">
+  <h3>Your Device Information:</h3>
+  {Array.isArray(deviceInfo) ? (
+    deviceInfo.map((device, index) => (
+      <div key={index} className="device-summary">
+        <p><strong>Model:</strong> {device.phoneModel}</p>
+        <p><strong>Storage:</strong> {device.storage}</p>
+        <p><strong>Condition:</strong> {device.condition}</p>
+        <p><strong>Estimated Value:</strong> £{device.estimatedValue}</p>
       </div>
-      <div className="device-info">
-      <h3>Your Device Information:</h3>
+    ))
+  ) : (
+    <div className="device-summary">
       <p><strong>Model:</strong> {deviceInfo.phoneModel}</p>
-      <p><strong>Storage:</strong> {deviceInfo.storage} </p>
+      <p><strong>Storage:</strong> {deviceInfo.storage}</p>
       <p><strong>Condition:</strong> {deviceInfo.condition}</p>
       <p><strong>Estimated Value:</strong> £{deviceInfo.estimatedValue}</p>
-      </div>
+    </div>
+  )}
+</div>
+
           <div className="form-group">
             <label htmlFor="name">Name:</label>
             <input
@@ -129,9 +130,10 @@ const ShippingDetailsPage = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder='Please enter your full name'
+              placeholder="Please enter your full name"
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="email">Email:</label>
             <input
@@ -140,9 +142,10 @@ const ShippingDetailsPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder='Please enter your Email address'
+              placeholder="Please enter your Email address"
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="address">Address:</label>
             <textarea
@@ -150,9 +153,10 @@ const ShippingDetailsPage = () => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               required
-              placeholder='Please enter your address'
+              placeholder="Please enter your address"
             ></textarea>
           </div>
+
           <div className="form-group">
             <label htmlFor="phone">Phone Number:</label>
             <input
@@ -161,9 +165,10 @@ const ShippingDetailsPage = () => {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
-              placeholder='00000000000'
+              placeholder="00000000000"
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="accountNumber">Account Number:</label>
             <input
@@ -172,20 +177,22 @@ const ShippingDetailsPage = () => {
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
               required
-            placeholder='00000000'
+              placeholder="00000000"
             />
           </div>
+
           <div className="form-group">
-            <label htmlFor="sortCode">sortCode:</label>
+            <label htmlFor="sortCode">Sort Code:</label>
             <input
               type="text"
               id="sortCode"
               value={sortCode}
-              onChange={(e) => setsortCode(e.target.value)}
+              onChange={(e) => setSortCode(e.target.value)}
               required
-              placeholder='00-00-00'
+              placeholder="00-00-00"
             />
           </div>
+
           {loading ? (
             <LinearProgress className="progress-bar" />
           ) : (
@@ -195,19 +202,13 @@ const ShippingDetailsPage = () => {
       ) : (
         <div className="success-message">
           <h3>Success! Your Details Have Been Submitted.</h3>
-          <br></br>
-          <h5>
-            Thank you for submitting your phone's details. We've received your information, and a confirmation email has been sent to you with the next steps.
-          </h5>
-          <br></br>
-          <p>
-            If you have selected to post it yourself please post to this address:
-          TheUKPhoneBuyer Unit 6B Park Farm Business Centre IP286TS Bury St Edmunds
-          </p>
+          <h5>Thank you for submitting your devices. A confirmation email has been sent to you.</h5>
+          <p>If you selected to post your devices, please send them to:</p>
+          <p>TheUKPhoneBuyer, Unit 6B Park Farm Business Centre, IP286TS, Bury St Edmunds</p>
         </div>
       )}
     </div>
   );
-}
+};
 
 export default ShippingDetailsPage;

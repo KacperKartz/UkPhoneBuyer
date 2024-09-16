@@ -1,0 +1,45 @@
+.tracking-page {
+
+    padding: 50px 0;
+    min-height: 100vh;
+  }
+  
+  .tracking-card {
+    background-color: white !important;;
+    padding: 30px !important;;
+    border-radius: 10px !important;;
+    border-width: 0px !important;;  
+    border-radius: 10px !important;
+    color: #141414 !important;;
+  }
+
+  .tracking-card:hover {
+    transform: none;
+    box-shadow: none;
+    transition: none;
+    transform: none;
+    filter: none;
+  }
+  
+  .tracking-card h2 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    color: #007bff;
+
+  }
+  
+  .tracking-info {
+    background-color: #f1f3f4;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .progress-bar {
+    transition: width 0.4s ease;
+  }
+  
+  .alert {
+    text-align: center;
+    font-size: 16px;
+  }
+  

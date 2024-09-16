@@ -1,28 +1,34 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef,useCallback  } from 'react';
 import './PhoneGrid.css';
 import { useNavigate } from 'react-router-dom';
 
-const PhoneCard = ({ phone, navigate, isSliding }) => {
+const PhoneCard = React.memo(({ phone, navigate, isSliding }) => {
     const phoneimg = `/phones/${phone.url}`;
-    const handleButtonClick = () => {
+    const handleButtonClick = useCallback(() => {
         console.log("clicked", phone.model);
         navigate(`/details/${phone.model}`);
-    };
+    }, [navigate, phone.model]);
 
     return (
         <div className={`phone-card shadow ${isSliding ? "scrollanimation" : ""}`} onClick={handleButtonClick}>
-            <img src={phoneimg} alt={phone.name} className="card-image" />
+            <img src={phoneimg} alt={phone.name} className="card-image" loading="lazy" />
             <h3 className="card-title">{phone.model}</h3>
         </div>
     );
-};
+});
 
 const PhoneGrid = ({ data, isSliding, offsetClass }) => {
     const navigate = useNavigate();
     const containerRef = useRef(null);
 
     // Create a duplicate of the items to achieve infinite scrolling
-    const items = [...data, ...data,];
+    let items = [...data];
+
+    if (isSliding){
+        let items = [...data, ...data,];
+    }else{
+        let items = [...data];
+    }
 
     useEffect(() => {
         const container = containerRef.current;

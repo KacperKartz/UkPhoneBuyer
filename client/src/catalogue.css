@@ -26,6 +26,7 @@
   }
 
 
+
   .sort-button {
 
     background-color: #f9f9f9;
@@ -36,6 +37,11 @@
     transition-duration: 0.2s;
   }
   
+  .backButton{
+    margin: auto;
+    margin-left: 10px;
+  }
+
   .sort-button.active {
     background-color: #4c87af;
     color: white;
@@ -46,4 +52,28 @@
     background-color: rgb(52, 104, 202);
   }
 
+
+
+  
+  @media (max-width: 767px) {
+
+
+    .sort-buttons-container {
+    
+      margin-right: 16px; 
+      margin-top: 10px; 
+      max-width: 400px;
+    }
+
+    .sort-button {
+
+    }
+    
+    .backButton{
+      margin: 10;
+      margin-left: 20px;
+    }
+  
+
+}
 

@@ -8,15 +8,48 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
-
+const API_KEY = process.env.ROYAL_MAIL_API_KEY;
+const clientSecret = process.env.ROYAL_MAIL_CLIENT_SECRET;
 app.use(express.json());
 
 
-
+app.post('/track-order', async (req, res) => {
+    const { trackingNumber } = req.body;  // Tracking number received from the frontend
+  
+    if (!trackingNumber) {
+      return res.status(400).json({ message: 'Tracking number is required' });
+    }
+  
+    try {
+      // Make a request to Royal Mail's tracking API
+      const response = await axios.get(`https://api.royalmail.net/mailpieces/v2/summary?mailPieceId=${trackingNumber}`, {
+        headers: {
+          'X-IBM-Client-Id': process.env.API_KEY,          // Your Royal Mail API key
+          'X-IBM-Client-Secret': process.env.CLIENT_SECRET, // Your Royal Mail client secret
+          'X-Accept-RMG-Terms': 'yes',                     // Accept the Royal Mail terms
+          'Accept': 'application/json'                     // Expect a JSON response
+        },
+      });
+  
+      // Send the tracking details back to the client
+      res.status(200).json(response.data);
+    } catch (error) {
+      console.error('Error fetching Royal Mail tracking data:', error.message);
+      
+      // Check if there's an error from Royal Mail's API
+      if (error.response && error.response.data) {
+        res.status(error.response.status).json({ message: error.response.data.moreInformation || 'Error retrieving tracking information' });
+      } else {
+        res.status(500).json({ message: 'Failed to retrieve tracking information' });
+      }
+    }
+  });
+  
 
 const transporter = nodemailer.createTransport({
     service: 'Gmail', // You can use other email services
@@ -60,7 +93,26 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 
 app.post('/send-email', (req, res) => {
-    const { to, subject, text } = req.body;
+    const { to, name, phoneModel, estimatedValue } = req.body;
+
+    const subject = 'Confirmation of Your Phone Submission - The UK Phone Fixer';
+    const text = `
+        Dear ${name},
+
+        Thank you for choosing The UK Phone Fixer to sell your phone. We have successfully received the details of your submission. Here are the details:
+
+        Phone Model: ${phoneModel}
+        Estimated Value: £${estimatedValue}
+
+        Our team will review the information provided, and you will receive a follow-up email once your phone has been assessed and the final value confirmed.
+
+        If you have any questions in the meantime, feel free to reply to this email, and our support team will be happy to assist you.
+
+        Kind regards,
+        The UK Phone Fixer Team
+        Buyback Department
+        buyback@theukphonefixer.co.uk
+    `;
 
     const mailOptions = {
         from: 'Buyback@theukphonefixer.co.uk',
@@ -244,6 +296,72 @@ app.post('/submit-details', (req, res) => {
 });
 
 
+app.post('/submit-details-m', (req, res) => {
+    const { name, email, address, phone, devices, accountNumber, sortCode } = req.body;
+
+    // Get a connection from the pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Database connection error:', err);
+            return res.status(500).send('Database connection error');
+        }
+
+        // Start a transaction
+        connection.beginTransaction((err) => {
+            if (err) {
+                connection.release();
+                return res.status(500).send('Transaction initiation error');
+            }
+
+            // Insert into Orders table
+            const orderQuery = `INSERT INTO Orders (name, email, address, phone, accountnumber, sortcode) VALUES (?, ?, ?, ?, ?, ?)`;
+            connection.query(orderQuery, [name, email, address, phone, accountNumber, sortCode], (error, result) => {
+                if (error) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(500).send('Error inserting order');
+                    });
+                }
+
+                const orderId = result.insertId;
+
+                // Insert each device into OrderDevices table
+                const deviceQueries = devices.map(device => {
+                    return new Promise((resolve, reject) => {
+                        const deviceQuery = `INSERT INTO OrderDevices (order_id, phone_model, storage, \`condition\`, estimated_value, serialNumber) VALUES (?, ?, ?, ?, ?, ?)`;
+                        connection.query(deviceQuery, [orderId, device.phoneModel, device.storage, device.condition, device.estimatedValue, device.serialNumber], (err, result) => {
+                            if (err) return reject(err);
+                            resolve(result);
+                        });
+                    });
+                });
+
+                // Execute all device queries
+                Promise.all(deviceQueries)
+                    .then(() => {
+                        // Commit transaction if all queries are successful
+                        connection.commit((err) => {
+                            if (err) {
+                                return connection.rollback(() => {
+                                    connection.release();
+                                    res.status(500).send('Transaction commit error');
+                                });
+                            }
+
+                            connection.release();
+                            res.status(201).send('Order submitted successfully with multiple devices');
+                        });
+                    })
+                    .catch(err => {
+                        connection.rollback(() => {
+                            connection.release();
+                            res.status(500).send('Error inserting devices');
+                        });
+                    });
+            });
+        });
+    });
+});
 
 
 function getModelPrice(modelName, callback) {
@@ -317,6 +435,71 @@ app.post('/estimate-value', (req, res) => {
         res.json({ estimatedValue: basePrice.toFixed(2) });
     });
 });
+
+app.post('/estimate-values', (req, res) => {
+    const { devices } = req.body;
+
+    // Check if devices are provided
+    if (!devices || !Array.isArray(devices)) {
+        return res.status(400).json({ error: 'Invalid request, devices must be an array' });
+    }
+
+    // Process each device to estimate the value
+    const estimatedValues = devices.map(device => {
+        const { phoneModel, storage, condition } = device;
+
+        console.log(`Received phoneModel: ${phoneModel}, storage: ${storage}, condition: ${condition}`);
+
+        // Fetch model price using a callback or promise-based function
+        let modelPrice = getModelPrice(phoneModel); 
+        
+        if (modelPrice === null) {
+            return { phoneModel, error: `Model ${phoneModel} not found.` };
+        }
+
+        let basePrice = parseFloat(modelPrice);
+
+        // Adjust price based on storage
+        switch (storage) {
+            case '64GB':
+                break;
+            case '128GB':
+                basePrice += 50;
+                break;
+            case '256GB':
+                basePrice += 100;
+                break;
+            case '512GB':
+                basePrice += 150;
+                break;
+            default:
+                return { phoneModel, error: `Invalid storage option: ${storage}` };
+        }
+
+        // Adjust price based on condition
+        switch (condition) {
+            case 'poor':
+                break;
+            case 'fair':
+                basePrice *= 1.05;
+                break;
+            case 'good':
+                basePrice *= 1.1;
+                break;
+            case 'excellent':
+                basePrice *= 1.2;
+                break;
+            default:
+                return { phoneModel, error: `Invalid condition: ${condition}` };
+        }
+
+        return { phoneModel, estimatedValue: basePrice.toFixed(2) };
+    });
+
+    res.json({ estimatedValues });
+});
+
+
 
 
 app.listen(port, () => {

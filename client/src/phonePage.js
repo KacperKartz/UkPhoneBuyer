@@ -34,20 +34,31 @@ const PhonePage = () => {
         console.log(`Sorted by release year: ${direction}`);
     };
 
+    const handleGoBack = () => {
+        try{
+            navigate(-1);
+        }catch{
+            navigate("/")
+        }
+    }
+
     return (
         <div className="maindiv">
             <h1 className="heading catalogue">Phone Catalog</h1>
             <div className="holder">
                 <div className='sort-buttons-container'>
+                <button className='btn backButton sort-button' onClick={handleGoBack}>
+                    Go Back
+                 </button>
                     <button 
                         onClick={() => handleSort('asc')}
-                        className={`sort-button ${sortDirection === 'asc' ? 'active' : ''}`}
+                        className={`btn sort-button ${sortDirection === 'asc' ? 'active' : ''}`}
                     >
                         Sort Year ↑
                     </button>
                     <button 
                         onClick={() => handleSort('desc')}
-                        className={`sort-button ${sortDirection === 'desc' ? 'active' : ''}`}
+                        className={`btn sort-button ${sortDirection === 'desc' ? 'active' : ''}`}
                     >
                         Sort Year ↓
                     </button>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Table from 'react-bootstrap/Table';
-import Button from 'react-bootstrap/Button';
+import { Table, Button, Card, Spinner, Alert, Container, Row, Col, Modal } from 'react-bootstrap';
 
 const AdminPage = () => {
   const [userData, setUserData] = useState([]);
@@ -10,6 +9,8 @@ const AdminPage = () => {
   const [editedPrice, setEditedPrice] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,16 +20,16 @@ const AdminPage = () => {
         // Fetch user data
         const userResponse = await axios.get(`${process.env.REACT_APP_BACKEND_API}/users`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setUserData(userResponse.data);
 
         // Fetch product data
         const productResponse = await axios.get(`http://localhost:5000/phones`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setProductData(productResponse.data);
       } catch (error) {
@@ -54,14 +55,20 @@ const AdminPage = () => {
   const handleSavePrice = async () => {
     try {
       const token = sessionStorage.getItem('accessToken');
-      await axios.put(`http://localhost:5000/phones/${editingProductId}`, { price: editedPrice }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      await axios.put(
+        `http://localhost:5000/phones/${editingProductId}`,
+        { price: editedPrice },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
-      setProductData(productData.map(product => 
-        product.id === editingProductId ? { ...product, price: editedPrice } : product
-      ));
+      );
+      setProductData(
+        productData.map((product) =>
+          product.id === editingProductId ? { ...product, price: editedPrice } : product
+        )
+      );
       setEditingProductId(null);
       setEditedPrice('');
     } catch (error) {
@@ -70,98 +77,180 @@ const AdminPage = () => {
     }
   };
 
+  const handleShowDetails = (user) => {
+    setSelectedUser(user);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedUser(null);
+  };
+
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" />
+      </div>
+    );
   }
 
   if (error) {
-    return <p>Error: {error.message}</p>;
+    return <Alert variant="danger">Error: {error.message}</Alert>;
   }
 
   return (
-    <div>
-      <h2>User Data</h2>
-      <Table striped bordered hover className='shadow'>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Address</th>
-            <th>Phone</th>
-            <th>Phone Model</th>
-            <th>Storage</th>
-            <th>Condition</th>
-            <th>Estimated Value</th>
-            <th>Serial Number</th>
-            <th>Account Number</th>
-            <th>Sort Code</th>
-          </tr>
-        </thead>
-        <tbody>
-          {userData.map((user) => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.address}</td>
-              <td>{user.phone}</td>
-              <td>{user.phone_model}</td>
-              <td>{user.storage}</td>
-              <td>{user.condition}</td>
-              <td>{user.estimated_value}</td>
-              <td>{user.serialNumber}</td>
-              <td>{user.accountnumber}</td>
-              <td>{user.sortcode}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+    <Container fluid className="py-4">
+      <Row>
+        <Col>
+          <h2 className="mb-4 text-center">Admin Dashboard</h2>
+        </Col>
+      </Row>
 
-      <h2>Product Data</h2>
-      <Table striped bordered hover className='shadow'>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Brand</th>
-            <th>Model</th>
-            <th>Price</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {productData.map((product) => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.brand}</td>
-              <td>{product.model}</td>
-              <td>
-                {editingProductId === product.id ? (
-                  <input 
-                    type="number" 
-                    value={editedPrice} 
-                    onChange={handlePriceChange} 
-                    step="0.01"
-                  />
-                ) : (
-                  product.price
-                )}
-              </td>
-              <td>
-                {editingProductId === product.id ? (
-                  <>
-                    <Button onClick={handleSavePrice}>Save</Button>
-                    <Button onClick={() => setEditingProductId(null)}>Cancel</Button>
-                  </>
-                ) : (
-                  <Button onClick={() => handleEditPrice(product)}>Edit Price</Button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </div>
+      <Row>
+        <Col lg={12} className="mb-4">
+          <Card className="shadow-sm">
+            <Card.Body>
+              <Card.Title>User Data</Card.Title>
+              <Table responsive bordered hover className="mb-0">
+                <thead className="table-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone Model</th>
+                    <th>Storage</th>
+                    <th>Condition</th>
+                    <th>Estimated Value</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userData.map((user) => (
+                    <tr key={user.id}>
+                      <td>{user.id}</td>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.phone_model}</td>
+                      <td>{user.storage}</td>
+                      <td>{user.condition}</td>
+                      <td>{user.estimated_value}</td>
+                      <td>
+                        <Button variant="info" size="sm" onClick={() => handleShowDetails(user)}>
+                          View Details
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col lg={12} className="mb-4">
+          <Card className="shadow-sm">
+            <Card.Body>
+              <Card.Title>Product Data</Card.Title>
+              <Table responsive bordered hover className="mb-0">
+                <thead className="table-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productData.map((product) => (
+                    <tr key={product.id}>
+                      <td>{product.id}</td>
+                      <td>{product.brand}</td>
+                      <td>{product.model}</td>
+                      <td>
+                        {editingProductId === product.id ? (
+                          <input
+                            type="number"
+                            value={editedPrice}
+                            onChange={handlePriceChange}
+                            className="form-control"
+                            step="0.01"
+                          />
+                        ) : (
+                          `£${product.price}`
+                        )}
+                      </td>
+                      <td>
+                        {editingProductId === product.id ? (
+                          <>
+                            <Button
+                              variant="success"
+                              size="sm"
+                              className="me-2"
+                              onClick={handleSavePrice}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setEditingProductId(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="warning"
+                            size="sm"
+                            onClick={() => handleEditPrice(product)}
+                          >
+                            Edit Price
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* User Details Modal */}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>User Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedUser && (
+            <div>
+              <p><strong>ID:</strong> {selectedUser.id}</p>
+              <p><strong>Name:</strong> {selectedUser.name}</p>
+              <p><strong>Email:</strong> {selectedUser.email}</p>
+              <p><strong>Address:</strong> {selectedUser.address}</p>
+              <p><strong>Phone:</strong> {selectedUser.phone}</p>
+              <p><strong>Phone Model:</strong> {selectedUser.phone_model}</p>
+              <p><strong>Storage:</strong> {selectedUser.storage}</p>
+              <p><strong>Condition:</strong> {selectedUser.condition}</p>
+              <p><strong>Estimated Value:</strong> {selectedUser.estimated_value}</p>
+              <p><strong>Serial Number:</strong> {selectedUser.serialNumber}</p>
+              <p><strong>Account Number:</strong> {selectedUser.accountnumber}</p>
+              <p><strong>Sort Code:</strong> {selectedUser.sortcode}</p>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
   );
 };
 

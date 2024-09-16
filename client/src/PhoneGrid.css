@@ -23,12 +23,12 @@
 }
 
 .phone-slider.offset-1 {
-  animation-delay: -1s; /* No delay for the first slider */
+  animation-delay: 0s; /* No delay for the first slider */
 }
 
 .phone-slider.offset-2 {
   animation-delay: -5s; 
-
+  
 }
   
 /* Standard grid layout for non-sliding mode */
@@ -59,6 +59,7 @@
   padding: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   transition: 0.4s;
+  cursor: pointer;
 }
 
 
