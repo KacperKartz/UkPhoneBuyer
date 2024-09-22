@@ -16,7 +16,7 @@ function DetailsPage() {
   const [loading, setLoading] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [serialNumber, setSerialNumber] = useState("");
-  const { setDeviceInfo } = useContext(AppContext);
+  const { setDeviceInfo, deviceInfo } = useContext(AppContext);
   const [data, setData] = useState([]);
 
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ function DetailsPage() {
       if (storage && condition && itemDetails) {
         setLoading(true);
         try {
-          const response = await axios.post(`${process.env.REACT_APP_BACKEND_API}/estimate-value`, {
+          const response = await axios.post(`http://localhost:5000/estimate-value`, {
             phoneModel: itemDetails.model,
             condition,
             storage
@@ -67,7 +67,7 @@ function DetailsPage() {
       }
     };
     estimateValue();
-  }, [storage, condition, itemDetails, serialNumber, setDeviceInfo]);
+  }, [storage, condition, itemDetails, setDeviceInfo]);
 
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
@@ -78,6 +78,7 @@ function DetailsPage() {
   };
 
   const handleProceed = () => {
+    console.log(deviceInfo);
     navigate("/shipping-details");
   };
 

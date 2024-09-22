@@ -51,6 +51,7 @@ app.post('/track-order', async (req, res) => {
   });
   
 
+  
 const transporter = nodemailer.createTransport({
     service: 'Gmail', // You can use other email services
     host: "smtp.gmail.com",
@@ -70,7 +71,7 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
 });
 
 app.use(cors());
@@ -94,6 +95,7 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 app.post('/send-email', (req, res) => {
     const { to, name, phoneModel, estimatedValue } = req.body;
+    
 
     const subject = 'Confirmation of Your Phone Submission - The UK Phone Fixer';
     const text = `
@@ -229,6 +231,23 @@ app.get('/phone/:id/baseprice', (req, res) => {
     });
 });
 
+const retryQuery = (queryFunc, retries = 3) => {
+    return new Promise((resolve, reject) => {
+        const attemptQuery = (retriesLeft) => {
+            queryFunc((err, result) => {
+                if (err && retriesLeft > 0) {
+                    console.warn(`Retrying... ${retriesLeft} attempts left`);
+                    return attemptQuery(retriesLeft - 1);
+                }
+                if (err) return reject(err);
+                resolve(result);
+            });
+        };
+        attemptQuery(retries);
+    });
+};
+
+
 app.put('/phones/:id', authenticateToken, (req, res) => {
     const productId = parseInt(req.params.id, 10);
     const { price } = req.body;
@@ -277,89 +296,158 @@ process.on('SIGINT', () => {
 //     return iv.toString('hex') + ':' + encrypted.toString('hex');
 // }
 
+app.get('/users-with-devices', (req, res) => {
+    const query = `
+        SELECT u.*, d.phone_model, d.storage, d.device_condition, d.estimated_value, d.serial_number
+        FROM users u
+        LEFT JOIN devices d ON u.id = d.user_id
+    `;
+
+    pool.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching users and devices:', err);
+            return res.status(500).send('Database error');
+        }
+        
+        // Group results by user
+        const users = {};
+        results.forEach(row => {
+            if (!users[row.id]) {
+                users[row.id] = {
+                    id: row.id,
+                    name: row.name,
+                    email: row.email,
+                    address: row.address,
+                    phone: row.phone,
+                    account_number: row.account_number,
+                    sort_code: row.sort_code,
+                    devices: []
+                };
+            }
+            users[row.id].devices.push({
+                phone_model: row.phone_model,
+                storage: row.storage,
+                device_condition: row.device_condition,
+                estimated_value: row.estimated_value,
+                serial_number: row.serial_number
+            });
+        });
+
+        // Convert object to array
+        res.json(Object.values(users));
+    });
+});
+
+
+
 app.post('/submit-details', (req, res) => {
     const { name, email, address, phone, phoneModel, storage, condition, estimatedValue, serialNumber, accountNumber, sortCode } = req.body;
 
-    const query = `
-        INSERT INTO UserDetails (name, email, address, phone, phone_model, storage, \`condition\`, estimated_value, serialNumber, accountnumber, sortcode)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    // Start a transaction
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Error getting connection:', err);
+            return res.status(500).send('Database connection error');
+        }
+
+        connection.beginTransaction((err) => {
+            if (err) {
+                console.error('Error starting transaction:', err);
+                connection.release();
+                return res.status(500).send('Transaction error');
+            }
+
+            const userQuery = `
+                INSERT INTO users (name, email, address, phone, account_number, sort_code)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
+
+            connection.query(userQuery, [name, email, address, phone, accountNumber, sortCode], (error, results) => {
+                if (error) {
+                    console.error('Error inserting user:', error);
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(500).send('Database error while inserting user');
+                    });
+                }
+
+                const userId = results.insertId;  // Get the inserted user ID
+
+                // Insert the device details
+                const deviceQuery = `
+                    INSERT INTO devices (user_id, phone_model, storage, device_condition, estimated_value, serial_number)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                `;
+
+                connection.query(deviceQuery, [userId, phoneModel, storage, condition, estimatedValue, serialNumber], (deviceError, deviceResult) => {
+                    if (deviceError) {
+                        console.error('Error inserting device:', deviceError);
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).send('Error inserting device, transaction rolled back');
+                        });
+                    }
+
+                    // Commit the transaction if both queries are successful
+                    connection.commit((commitError) => {
+                        if (commitError) {
+                            console.error('Error committing transaction:', commitError);
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(500).send('Commit error, transaction rolled back');
+                            });
+                        }
+
+                        connection.release();
+                        res.status(201).send('Order submitted successfully with the device');
+                    });
+                });
+            });
+        });
+    });
+});
+
+app.post('/submit-details-m', (req, res) => {
+    const { name, email, address, phone, devices, accountNumber, sortCode } = req.body;
+
+    const orderQuery = `
+        INSERT INTO users (name, email, address, phone, account_number, sort_code)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    pool.query(query, [name, email, address, phone, phoneModel, storage, condition, estimatedValue, serialNumber, accountNumber, sortCode], (error, results) => {
+    pool.query(orderQuery, [name, email, address, phone, accountNumber, sortCode], (error, results) => {
         if (error) {
             console.error('Database query error:', error);
             res.status(500).send('Database error');
             return;
         }
-        res.status(201).send('Details submitted successfully');
-    });
-});
 
+        const orderId = results.insertId;
 
-app.post('/submit-details-m', (req, res) => {
-    const { name, email, address, phone, devices, accountNumber, sortCode } = req.body;
+        // Insert each device into device table
+        const deviceQueries = devices.map(device => {
+            const deviceQuery = `
+                INSERT INTO devices (user_id, phone_model, storage, device_condition, estimated_value, serial_number)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
 
-    // Get a connection from the pool
-    pool.getConnection((err, connection) => {
-        if (err) {
-            console.error('Database connection error:', err);
-            return res.status(500).send('Database connection error');
-        }
-
-        // Start a transaction
-        connection.beginTransaction((err) => {
-            if (err) {
-                connection.release();
-                return res.status(500).send('Transaction initiation error');
-            }
-
-            // Insert into Orders table
-            const orderQuery = `INSERT INTO Orders (name, email, address, phone, accountnumber, sortcode) VALUES (?, ?, ?, ?, ?, ?)`;
-            connection.query(orderQuery, [name, email, address, phone, accountNumber, sortCode], (error, result) => {
-                if (error) {
-                    return connection.rollback(() => {
-                        connection.release();
-                        res.status(500).send('Error inserting order');
-                    });
-                }
-
-                const orderId = result.insertId;
-
-                // Insert each device into OrderDevices table
-                const deviceQueries = devices.map(device => {
-                    return new Promise((resolve, reject) => {
-                        const deviceQuery = `INSERT INTO OrderDevices (order_id, phone_model, storage, \`condition\`, estimated_value, serialNumber) VALUES (?, ?, ?, ?, ?, ?)`;
-                        connection.query(deviceQuery, [orderId, device.phoneModel, device.storage, device.condition, device.estimatedValue, device.serialNumber], (err, result) => {
-                            if (err) return reject(err);
-                            resolve(result);
-                        });
-                    });
+            return new Promise((resolve, reject) => {
+                pool.query(deviceQuery, [orderId, device.model, device.storage, device.condition, device.estimatedValue, device.serialNumber], (deviceError, deviceResult) => {
+                    if (deviceError) return reject(deviceError);
+                    resolve(deviceResult);
                 });
-
-                // Execute all device queries
-                Promise.all(deviceQueries)
-                    .then(() => {
-                        // Commit transaction if all queries are successful
-                        connection.commit((err) => {
-                            if (err) {
-                                return connection.rollback(() => {
-                                    connection.release();
-                                    res.status(500).send('Transaction commit error');
-                                });
-                            }
-
-                            connection.release();
-                            res.status(201).send('Order submitted successfully with multiple devices');
-                        });
-                    })
-                    .catch(err => {
-                        connection.rollback(() => {
-                            connection.release();
-                            res.status(500).send('Error inserting devices');
-                        });
-                    });
             });
         });
+
+        // Execute all device queries
+        Promise.all(deviceQueries)
+            .then(() => {
+                res.status(201).send('Order submitted successfully with multiple devices');
+            })
+            .catch(deviceError => {
+                console.error('Error inserting devices:', deviceError);
+                res.status(500).send('Error inserting devices');
+            });
     });
 });
 
@@ -389,6 +477,7 @@ app.post('/estimate-value', (req, res) => {
         if (err) {
             console.error('Error fetching model price:', err);
             return res.status(500).json({ error: 'Internal server error' });
+            retryQuery();
         }
         if (price === null) {
             return res.status(404).json({ error: `Model ${phoneModel} not found.` });

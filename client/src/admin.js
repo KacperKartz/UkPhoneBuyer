@@ -17,8 +17,8 @@ const AdminPage = () => {
       try {
         const token = sessionStorage.getItem('accessToken');
 
-        // Fetch user data
-        const userResponse = await axios.get(`${process.env.REACT_APP_BACKEND_API}/users`, {
+        // Fetch user data with multiple devices
+        const userResponse = await axios.get(`http://localhost:5000/users-with-devices`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -118,10 +118,7 @@ const AdminPage = () => {
                     <th>ID</th>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Phone Model</th>
-                    <th>Storage</th>
-                    <th>Condition</th>
-                    <th>Estimated Value</th>
+                    <th>Devices</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -131,10 +128,15 @@ const AdminPage = () => {
                       <td>{user.id}</td>
                       <td>{user.name}</td>
                       <td>{user.email}</td>
-                      <td>{user.phone_model}</td>
-                      <td>{user.storage}</td>
-                      <td>{user.condition}</td>
-                      <td>{user.estimated_value}</td>
+                      <td>
+                        <ul>
+                          {user.devices.map((device) => (
+                            <li key={device.id}>
+                              {device.phone_model}, {device.storage}GB, {device.device_condition}, Estimated Value: £{device.estimated_value}
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
                       <td>
                         <Button variant="info" size="sm" onClick={() => handleShowDetails(user)}>
                           View Details
@@ -234,13 +236,19 @@ const AdminPage = () => {
               <p><strong>Email:</strong> {selectedUser.email}</p>
               <p><strong>Address:</strong> {selectedUser.address}</p>
               <p><strong>Phone:</strong> {selectedUser.phone}</p>
-              <p><strong>Phone Model:</strong> {selectedUser.phone_model}</p>
-              <p><strong>Storage:</strong> {selectedUser.storage}</p>
-              <p><strong>Condition:</strong> {selectedUser.condition}</p>
-              <p><strong>Estimated Value:</strong> {selectedUser.estimated_value}</p>
-              <p><strong>Serial Number:</strong> {selectedUser.serialNumber}</p>
-              <p><strong>Account Number:</strong> {selectedUser.accountnumber}</p>
-              <p><strong>Sort Code:</strong> {selectedUser.sortcode}</p>
+              <ul>
+                {selectedUser.devices.map((device) => (
+                  <li key={device.id}>
+                    <p><strong>Phone Model:</strong> {device.phone_model}</p>
+                    <p><strong>Storage:</strong> {device.storage}GB</p>
+                    <p><strong>Condition:</strong> {device.device_condition}</p>
+                    <p><strong>Estimated Value:</strong> £{device.estimated_value}</p>
+                    <p><strong>Serial Number:</strong> {device.serial_number}</p>
+                  </li>
+                ))}
+              </ul>
+              <p><strong>Account Number:</strong> {selectedUser.account_number}</p>
+              <p><strong>Sort Code:</strong> {selectedUser.sort_code}</p>
             </div>
           )}
         </Modal.Body>

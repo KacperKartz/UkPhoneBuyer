@@ -60,45 +60,21 @@ const ShippingDetailsPage = () => {
       setLoading(true);
       try {
         // Send the form and multiple devices' data to the backend
-
-        if(Array.isArray(deviceInfo)) {
-            console.log("ARRAY")
-          await axios.post(`http://localhost:5000/submit-details-m`, {
-            name,
-            email,
-            address,
-            phone,
-            devices: deviceInfo,
-            accountNumber,
-            sortCode
-          });
-        } else {
-          console.log("NOT ARRAY")
-          await axios.post(`http://localhost:5000/submit-details`, {
-            name,
-            email,
-            address,
-            phone,
-            phoneModel: deviceInfo.phoneModel,
-            storage: deviceInfo.storage,
-            condition: deviceInfo.condition,
-            estimatedValue: deviceInfo.estimatedValue,
-            serialNumber: deviceInfo.serialNumber,
-            accountNumber,
-            sortCode
-          });
-
-        }
-
+        await axios.post(`http://localhost:5000/submit-details-m`, {
+          name,
+          email,
+          address,
+          phone,
+          devices: Array.isArray(deviceInfo) ? deviceInfo : [deviceInfo],
+          accountNumber,
+          sortCode
+        });
 
         try {
           await axios.post(`http://localhost:5000/send-email`, {
             "to": email,
             "subject": "Device Submission Confirmation",
-            "text": "Thank you for submitting your devices. We will process them soon.",
-            phoneModel: deviceInfo.phoneModel,
-            estimatedValue: deviceInfo.estimatedValue,
-            name
+            "text": "Thank you for submitting your devices. We will process them soon."
           });
         } catch (error) {
           console.error("Failed to send confirmation email");
@@ -123,26 +99,16 @@ const ShippingDetailsPage = () => {
 
           <div className="device-info">
   <h3>Your Device Information:</h3>
-  {Array.isArray(deviceInfo) ? (
-    deviceInfo.map((device, index) => (
-      <div key={index} className="device-summary">
-        <p><strong>Model:</strong> {device.model || 'N/A'}</p>
-        <p><strong>Storage:</strong> {device.storage || 'N/A'}</p>
-        <p><strong>Condition:</strong> {device.condition || 'N/A'}</p>
-        <p><strong>Estimated Value:</strong> £{device.estimatedValue || 'N/A'}</p>
-      </div>
-    ))
-  ) : (
-    <div className="device-summary">
-      <p><strong>Model:</strong> {deviceInfo.phoneModel || 'N/A'}</p>
-      <p><strong>Storage:</strong> {deviceInfo.storage || 'N/A'}</p>
-      <p><strong>Condition:</strong> {deviceInfo.condition || 'N/A'}</p>
-      <p><strong>Estimated Value:</strong> £{deviceInfo.estimatedValue || 'N/A'}</p>
-    </div>
-  )}
-  {/* <h1><strong>Total estimated value:</strong> £{totalCost || 'N/A'}</h1> */}
+  {deviceInfo.map((device, index) => (
+  <div key={index} className="device-summary">
+    <p><strong>Model:</strong> {device.model}</p>
+    <p><strong>Storage:</strong> {device.storage}</p>
+    <p><strong>Condition:</strong> {device.condition}</p>
+    <p><strong>Estimated Value:</strong> £{device.estimatedValue}</p>
+  </div>
+))}
+          <h2><strong>Total estimated value:</strong> £{totalCost}</h2>
 </div>
-
 
           <div className="form-group">
             <label htmlFor="name">Name:</label>

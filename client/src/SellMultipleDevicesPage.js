@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import SearchTable from './SearchTable';
 import Modal from 'react-modal';
 import axios from 'axios';
 import './SellMultipleDevicesPage.css';
+import { AppContext } from './AppContext';
+import {  useNavigate } from 'react-router-dom';
 
 const SellMultipleDevicesPage = () => {
   const [data, setData] = useState([]);
@@ -10,6 +12,12 @@ const SellMultipleDevicesPage = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [deviceToAdd, setDeviceToAdd] = useState(null);
   const [deviceQuantity, setDeviceQuantity] = useState(1);
+  const {setDeviceInfo} = useContext(AppContext);
+  const {setTotalCost} = useContext(AppContext);
+
+  const navigate = useNavigate();
+  
+
 
   // New states for additional attributes
   const [storage, setStorage] = useState("");
@@ -34,7 +42,7 @@ const SellMultipleDevicesPage = () => {
     setDeviceToAdd(null);
     setDeviceQuantity(1); // Reset quantity after closing modal
     setStorage("");        // Reset storage
-    setCondition("");      // Reset condition
+    setCondition("");      // Reset condition-
     setSerialNumber("");   // Reset serial number
   };
 
@@ -52,10 +60,24 @@ const SellMultipleDevicesPage = () => {
       alert('Please select both storage and condition before adding the device.');
       return;
     }
+
+    if (deviceQuantity < 1){
+      alert("Quantity must be at least 1")
+      return;
+    }
   
+    try {
 
   
-      // Update selected devices state
+      const response = await axios.post(`http://localhost:5000/estimate-value`, {
+        phoneModel: deviceToAdd.model,
+        condition,
+        storage
+      });
+      // Extract the estimated value from the response
+      const estimatedValue = parseFloat(response.data.estimatedValue);
+  
+      // Update selected devices state with the estimated value
       setSelectedDevices((prev) => {
         const existingDeviceIndex = prev.findIndex((d) => d.model === deviceToAdd.model);
         const newDevice = {
@@ -64,6 +86,7 @@ const SellMultipleDevicesPage = () => {
           storage,
           condition,
           serialNumber: serialNumber || null, // Include serialNumber if provided
+          estimatedValue // Add the estimated value
         };
   
         if (existingDeviceIndex > -1) {
@@ -74,7 +97,8 @@ const SellMultipleDevicesPage = () => {
             quantity: updatedDevices[existingDeviceIndex].quantity + deviceQuantity,
             storage,
             condition,
-            serialNumber: serialNumber || null
+            serialNumber: serialNumber || null,
+            estimatedValue // Update the estimated value
           };
           return updatedDevices;
         } else {
@@ -84,6 +108,11 @@ const SellMultipleDevicesPage = () => {
       });
   
       closeModal(); // Close the modal after adding the device
+  
+    } catch (error) {
+      console.error('Error estimating device value:', error);
+      alert('Failed to estimate device value. Please try again.');
+    }
   };
   
 
@@ -91,22 +120,24 @@ const SellMultipleDevicesPage = () => {
     // Remove the selected device from the list
     setSelectedDevices(prev => prev.filter(device => device.model !== model));
   };
+  
+
+  const getTotalCost = () => {
+    return selectedDevices.reduce((total, device) => {
+      return total + (device.estimatedValue * device.quantity);
+    }, 0).toFixed(2);
+  };
+
+
 
   const handleSubmit = async () => {
     
     console.log(selectedDevices);
-    try {
-      // Send the selected devices data to the backend
-      await axios.post(`http://localhost:5000/sell-multiple-devices`, {
-        devices: selectedDevices
-      });
-      alert('Devices submitted successfully!');
-      // Reset the selection after submission
-      setSelectedDevices([]);
-    } catch (error) {
-      console.error('Error submitting devices:', error);
-      alert('Failed to submit devices.');
-    }
+    setDeviceInfo(selectedDevices);
+    setTotalCost(getTotalCost());
+    
+    navigate("/shipping-details");
+  
   };
 
   return (
@@ -120,19 +151,24 @@ const SellMultipleDevicesPage = () => {
       </div>
 
       {selectedDevices.length > 0 && (
-        <div className="selected-devices">
+        <div className="multiple-selected-devices">
           <h3>Selected Devices</h3>
           <ul>
             {selectedDevices.map((device) => (
               <li key={device.model}>
-                <span>{device.brand} - {device.model} (x{device.quantity}) - {device.storage} - {device.condition}</span>
-                {device.serialNumber && <span> - SN: {device.serialNumber}</span>}
-                <button className="btn btn-danger btn-sm" onClick={() => handleRemoveDevice(device.model)}>
+                <span className='multiple-span'>{device.brand} - {device.model} (x{device.quantity}) - {device.storage} - {device.condition} - £{device.estimatedValue}</span>
+                {device.serialNumber && <span className='multiple-span'> - SN: {device.serialNumber}</span>}
+                <button className="btn btn-danger btn-sm btn-mutiple-remove" onClick={() => handleRemoveDevice(device.model)}>
                   Remove
                 </button>
               </li>
             ))}
           </ul>
+
+          <div>
+          <h3 className='total-value'>Total Estimated Value: £{getTotalCost()}</h3>
+          </div>
+
           <button className="btn btn-primary" onClick={handleSubmit}>
             Submit Devices
           </button>

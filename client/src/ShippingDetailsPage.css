@@ -33,6 +33,14 @@ html, body {
     color: #555;
   }
   
+
+  .device-summary{
+    background-color: aliceblue;
+    border-radius: 10px;
+    padding: 4px;
+    margin: 4px;
+  }
+
   .form-group input,
   .form-group textarea {
     width: 100%;

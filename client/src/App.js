@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 //import { data } from './data.js';
 import DetailsPage from './DetailsPage';
 import ShippingDetailsPage from './ShippingDetailsPage';
+import MultipleShippingDetailsPage from './MultipleShippingDetailsPage.js';
 import AdminLogin from './adminLogin';
 import AdminPage from './admin.js';
 import Layout from './Layout.js';
@@ -218,6 +219,7 @@ function App() {
         <Route path="/details/:itemModel" element={<DetailsPage />} />
         <Route path="/phonePage" element={<PhonePage />} />
         <Route path='/shipping-details' element = {<ShippingDetailsPage />} />
+        <Route path='/multiple-shipping-details' element = {<MultipleShippingDetailsPage />} />
         <Route  path='/FAQ' element={<FAQ/>} />
         <Route path='/order-tracking' element={<OrderTracking />} />
         <Route path='/sell-multiple' element={<SellMultipleDevicesPage />} />

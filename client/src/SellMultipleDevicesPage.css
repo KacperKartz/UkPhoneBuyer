@@ -112,3 +112,19 @@
     background-color: #5a6268;
   }
   
+
+ .multiple-selected-devices{
+  background-color:#8dccff;
+  border-radius: 10px;
+  padding: 5px;
+ }
+
+ .btn-mutiple-remove{
+  margin: 6px;
+ }
+
+ .multiple-span{
+  background-color:#fdfdfd ;
+  padding: 2px;
+  border-radius: 4px;
+ }
