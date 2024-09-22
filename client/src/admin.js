@@ -18,7 +18,7 @@ const AdminPage = () => {
         const token = sessionStorage.getItem('accessToken');
 
         // Fetch user data with multiple devices
-        const userResponse = await axios.get(`http://localhost:5000/users-with-devices`, {
+        const userResponse = await axios.get(`${process.env.REACT_APP_BACKEND_API}/users-with-devices`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -26,7 +26,7 @@ const AdminPage = () => {
         setUserData(userResponse.data);
 
         // Fetch product data
-        const productResponse = await axios.get(`http://localhost:5000/phones`, {
+        const productResponse = await axios.get(`${process.env.REACT_APP_BACKEND_API}/phones`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -56,7 +56,7 @@ const AdminPage = () => {
     try {
       const token = sessionStorage.getItem('accessToken');
       await axios.put(
-        `http://localhost:5000/phones/${editingProductId}`,
+        `${process.env.REACT_APP_BACKEND_API}/phones/${editingProductId}`,
         { price: editedPrice },
         {
           headers: {

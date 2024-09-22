@@ -63,7 +63,7 @@ const ShippingDetailsPage = () => {
 
         if(Array.isArray(deviceInfo)) {
             console.log("ARRAY")
-          await axios.post(`http://localhost:5000/submit-details-m`, {
+          await axios.post(`${process.env.REACT_APP_BACKEND_API}/submit-details-m`, {
             name,
             email,
             address,
@@ -74,7 +74,7 @@ const ShippingDetailsPage = () => {
           });
         } else {
           console.log("NOT ARRAY")
-          await axios.post(`http://localhost:5000/submit-details`, {
+          await axios.post(`${process.env.REACT_APP_BACKEND_API}/submit-details`, {
             name,
             email,
             address,
@@ -92,7 +92,7 @@ const ShippingDetailsPage = () => {
 
 
         try {
-          await axios.post(`http://localhost:5000/send-email`, {
+          await axios.post(`${process.env.REACT_APP_BACKEND_API}/send-email`, {
             "to": email,
             "subject": "Device Submission Confirmation",
             "text": "Thank you for submitting your devices. We will process them soon.",
