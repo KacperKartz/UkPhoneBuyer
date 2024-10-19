@@ -142,7 +142,8 @@ const SellMultipleDevicesPage = () => {
 
   return (
     <div className="sell-multiple-devices-page">
-      <h1>Sell Your Devices</h1>
+      <h1 className='md-title'>Sell Your Devices</h1>
+      <p className='md-title md-p'>Please select the deivces you'd like to sell and then submit them at the bottom of the page</p>
       <div>
         <SearchTable
           data={data}

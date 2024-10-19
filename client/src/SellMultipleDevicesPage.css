@@ -31,6 +31,17 @@
   .selected-devices button {
     margin-left: 15px;
   }
+
+  .md-p{
+    max-width: 400px;
+    margin: auto;
+    margin-bottom: 20px;
+  }
+  .md-title{
+    color: #fff;
+    text-align: center;
+    margin-bottom: 20px;
+  }
   
 
   .device-modal {

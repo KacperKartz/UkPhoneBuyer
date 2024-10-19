@@ -1,45 +1,55 @@
 .tracking-page {
+  background-color: #f8f9fa;
+  padding: 2rem 0;
+}
 
-    padding: 50px 0;
-    min-height: 100vh;
-  }
-  
-  .tracking-card {
-    background-color: white !important;;
-    padding: 30px !important;;
-    border-radius: 10px !important;;
-    border-width: 0px !important;;  
-    border-radius: 10px !important;
-    color: #141414 !important;;
-  }
+.tracking-card {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-height: 377.5px;
+}
 
-  .tracking-card:hover {
-    transform: none;
-    box-shadow: none;
-    transition: none;
-    transform: none;
-    filter: none;
-  }
-  
-  .tracking-card h2 {
-    font-family: 'Roboto', sans-serif;
-    font-weight: bold;
-    color: #007bff;
+.tracking-info {
+  background-color: #e9ecef;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
 
+.progress {
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: #007bff; /* Default color */
+  transition: width 0.4s ease; /* Smooth transition for width */
+}
+
+.progress-bar-striped {
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem; /* Adjust the size of the stripes */
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  from {
+    background-position: 1rem 0;
   }
-  
-  .tracking-info {
-    background-color: #f1f3f4;
-    padding: 20px;
-    border-radius: 8px;
+  to {
+    background-position: 0 0;
   }
-  
-  .progress-bar {
-    transition: width 0.4s ease;
-  }
-  
-  .alert {
-    text-align: center;
-    font-size: 16px;
-  }
-  
+}
+
+.homebtn {
+  margin-top: 2rem;
+}
+
+.text-light {
+  color: #6c757d;
+}
+
+.text-muted {
+  color: #6c757d;
+}

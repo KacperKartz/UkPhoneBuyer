@@ -41,6 +41,7 @@ function DetailsPage() {
       if (storage && condition && itemDetails) {
         setLoading(true);
         try {
+          // const response = await axios.post(`${process.env.REACT_APP_BACKEND_API}/estimate-value`, {
           const response = await axios.post(`${process.env.REACT_APP_BACKEND_API}/estimate-value`, {
             phoneModel: itemDetails.model,
             condition,
@@ -133,6 +134,7 @@ function DetailsPage() {
           <option value="128GB">128GB</option>
           <option value="256GB">256GB</option>
           <option value="512GB">512GB</option>
+          <option value="1TB">1TB</option>
         </select>
       </div>
 

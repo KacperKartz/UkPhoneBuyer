@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Navbar.css';
+import { DEFAULT_MIN_BREAKPOINT } from 'react-bootstrap/esm/ThemeProvider';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +43,9 @@ function Navbar() {
               <li className="nav-item">
                 <a className="nav-link" href="/FAQ">FAQ & Terms and conditions</a>
               </li>
+              <li className="nav-item">
+                <a className="nav-link" href="/contact">Contact us</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -53,7 +57,10 @@ function Navbar() {
           <a className="navbar-brandtp" href="https://uk.trustpilot.com/review/theukphonefixer.co.uk">
             <img src="https://cdn.trustpilot.net/brand-assets/4.3.0/logo-white.svg" alt="trustPilotLogo" className="tpLogo" height="30" />
           </a>
+          <div className='tpDiv'>
           <img src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-4.5.svg" alt="trustPilotStars" className="stars" height="30" />
+          <h4 className='text-light  ratedExcellent'>Rated Excellent</h4>
+          </div>
         </div>
       </div>
     </>

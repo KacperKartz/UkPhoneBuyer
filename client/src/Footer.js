@@ -9,8 +9,7 @@ function Footer() {
         <p>© 2024 TheUkBuyer. All rights reserved.</p>
         <nav>
           <ul className="footer-links">
-            <li><a href="/FAQ">About</a></li>
-            <li><a href="/FAQ">Contact</a></li>
+            <li><a href="/contact">Contact</a></li>
             <li><a href="/FAQ">Privacy Policy</a></li>
           </ul>
         </nav>

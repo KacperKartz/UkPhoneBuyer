@@ -191,6 +191,46 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
 
+
+app.delete("/phones/:id", (req, res) => {
+    const phoneId = req.params.id; 
+
+    const query = 'DELETE FROM phone WHERE id = ?';
+    
+    pool.query(query, [phoneId], (error, result) => {
+        if (error) {
+            console.error('Error deleting phone:', error);
+            return res.status(500).send('Error deleting phone');
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).send('Phone not found');
+        }
+
+        res.send('Phone deleted successfully');
+    });
+});
+
+
+app.post("/addPhone", async(req, res) => {
+    const { brand, model, price, year } = req.body;
+    const imageUrl = 'iPhone-11.png'; // Hardcoded image URL
+  
+    if (!brand || !model || !price || !year) {
+      return res.status(400).json({ message: 'Brand, model, price, and year are required' });
+    }
+  
+    const query = 'INSERT INTO phone (brand, model, price, release_year, url) VALUES (?, ?, ?, ?, ?)';
+    pool.query(query, [brand, model, price, year, imageUrl], (error, result) => {
+      if (error) {
+        console.error('Error adding phone:', error);
+        return res.status(500).json({ message: 'Database error' });
+      }
+  
+      res.status(201).json({ message: 'Phone added successfully', phoneId: result.insertId });
+    });
+  });
+
 app.get('/phones', (req, res) => {
     pool.query('SELECT * FROM Phone', (error, results) => {
         if (error) {
@@ -296,19 +336,103 @@ process.on('SIGINT', () => {
 //     return iv.toString('hex') + ':' + encrypted.toString('hex');
 // }
 
+
+
+///////////////// ORDER TRACKING
+
+function generateOrderNumber(userId) {
+    const timestamp = Date.now(); // Get current timestamp
+    const randomNum = Math.floor(1000 + Math.random() * 9000); // Generate random 4-digit number
+    return `ORD-${userId}-${randomNum}-${timestamp}`;
+  }
+
+  app.post('/create-order', (req, res) => {
+    const { userId, devices, shipmentProvider } = req.body;
+  
+    const orderNumber = generateOrderNumber(userId); // Generate unique order number
+  
+    // Insert new order with order number
+    const query = `INSERT INTO orders (user_id, order_number, order_status, shipment_provider, created_at) VALUES (?, ?, 'Processing', ?, NOW())`;
+    connection.query(query, [userId, orderNumber, shipmentProvider], (error, result) => {
+      if (error) throw error;
+  
+      const orderId = result.insertId;
+  
+      // Link devices to the order
+      const deviceQuery = `UPDATE devices SET order_id = ? WHERE device_id IN (?)`;
+      connection.query(deviceQuery, [orderId, devices], (deviceError) => {
+        if (deviceError) throw deviceError;
+        res.send({ success: true, orderNumber });
+      });
+    });
+  });
+
+
+
+
+
+  app.get('/track-order/:orderNumber', (req, res) => {
+    const { orderNumber } = req.params;  // Destructure the order number
+  
+    // Query to fetch the order details based on the order number
+    const query = `SELECT * FROM orders WHERE order_number = ?`;
+  
+    // Execute the query
+    pool.query(query, [orderNumber], (error, results) => {
+        if (error) {
+            console.error('Error fetching order:', error);
+            return res.status(500).send({ message: 'Server error' });
+        }
+  
+        if (results.length === 0) {
+            return res.status(404).send({ message: 'Order not found' });
+        }
+        const order = results[0];
+
+        // Add progress logic based on order status or other factors
+        let progress = 0;
+
+        let progressColor = 'bg-warning';
+
+        if (order.order_status === 'Processing') {
+            progress =25;
+        } else if (order.order_status === 'Awaiting Delivery') {
+            progress = 50;
+            progressColor = 'bg-info';
+        } else if (order.order_status === 'Inspecting Device') {
+            progress = 75;
+            progressColor = 'bg-info';
+        }
+         else if (order.order_status === 'Awaiting Payment') {
+            progress = 100;
+            progressColor = 'bg-success';
+        }
+  
+        // Send the found order details
+        res.json({
+            order_status: order.order_status,
+            progress,
+            progressColor,
+        });
+    });
+});
+
+
+
 app.get('/users-with-devices', (req, res) => {
     const query = `
-        SELECT u.*, d.phone_model, d.storage, d.device_condition, d.estimated_value, d.serial_number
+        SELECT u.*, d.phone_model, d.storage, d.device_condition, d.estimated_value, d.serial_number, o.order_status, o.order_number
         FROM users u
         LEFT JOIN devices d ON u.id = d.user_id
+        LEFT JOIN orders o ON u.id = o.user_id
     `;
 
     pool.query(query, (err, results) => {
         if (err) {
-            console.error('Error fetching users and devices:', err);
+            console.error('Error fetching users, devices, and orders:', err);
             return res.status(500).send('Database error');
         }
-        
+
         // Group results by user
         const users = {};
         results.forEach(row => {
@@ -321,6 +445,7 @@ app.get('/users-with-devices', (req, res) => {
                     phone: row.phone,
                     account_number: row.account_number,
                     sort_code: row.sort_code,
+                    order_status: row.order_status, // Add order status
                     devices: []
                 };
             }
@@ -333,11 +458,26 @@ app.get('/users-with-devices', (req, res) => {
             });
         });
 
-        // Convert object to array
         res.json(Object.values(users));
     });
 });
 
+
+app.post('/update-status/:userId', (req, res) => {
+    const { userId } = req.params;
+    const { status } = req.body;
+
+    const query = 'UPDATE orders SET order_status = ? WHERE user_id = ?';
+
+    pool.query(query, [status, userId], (err, result) => {
+        if (err) {
+            console.error('Error updating status:', err);
+            return res.status(500).send('Database error');
+        }
+
+        res.json({ success: true });
+    });
+});
 
 
 app.post('/submit-details', (req, res) => {
@@ -373,39 +513,59 @@ app.post('/submit-details', (req, res) => {
 
                 const userId = results.insertId;  // Get the inserted user ID
 
-                // Insert the device details
-                const deviceQuery = `
-                    INSERT INTO devices (user_id, phone_model, storage, device_condition, estimated_value, serial_number)
-                    VALUES (?, ?, ?, ?, ?, ?)
+
+                const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+                const orderQuery = `
+                    INSERT INTO orders (user_id, order_number, order_status)
+                    VALUES (?, ?, ?)
                 `;
 
-                connection.query(deviceQuery, [userId, phoneModel, storage, condition, estimatedValue, serialNumber], (deviceError, deviceResult) => {
-                    if (deviceError) {
-                        console.error('Error inserting device:', deviceError);
+                connection.query(orderQuery, [userId, orderNumber, 'Processing'], (orderError, orderResult) => {
+                    if (orderError) {
+                        console.error('Error inserting order:', orderError);
                         return connection.rollback(() => {
                             connection.release();
-                            res.status(500).send('Error inserting device, transaction rolled back');
+                            res.status(500).send('Database error while inserting order');
                         });
                     }
 
-                    // Commit the transaction if both queries are successful
-                    connection.commit((commitError) => {
-                        if (commitError) {
-                            console.error('Error committing transaction:', commitError);
+                    const orderId = orderResult.insertId; // Get the inserted order ID
+
+                    const deviceQuery = `
+                        INSERT INTO devices (user_id, phone_model, storage, device_condition, estimated_value, serial_number)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    `;
+
+                    connection.query(deviceQuery, [userId, phoneModel, storage, condition, estimatedValue, serialNumber], (deviceError, deviceResult) => {
+                        if (deviceError) {
+                            console.error('Error inserting device:', deviceError);
                             return connection.rollback(() => {
                                 connection.release();
-                                res.status(500).send('Commit error, transaction rolled back');
+                                res.status(500).send('Error inserting device, transaction rolled back');
                             });
                         }
 
-                        connection.release();
-                        res.status(201).send('Order submitted successfully with the device');
+                        // Commit the transaction if everything is successful
+                        connection.commit((commitError) => {
+                            if (commitError) {
+                                console.error('Error committing transaction:', commitError);
+                                return connection.rollback(() => {
+                                    connection.release();
+                                    res.status(500).send('Commit error, transaction rolled back');
+                                });
+                            }
+
+                            connection.release();
+                            res.status(201).json({ order_number: orderNumber, message: 'Order submitted successfully with the device' });
+                        });
                     });
                 });
             });
         });
     });
 });
+
 
 app.post('/submit-details-m', (req, res) => {
     const { name, email, address, phone, devices, accountNumber, sortCode } = req.body;
@@ -497,6 +657,9 @@ app.post('/estimate-value', (req, res) => {
                 break;
             case '512GB':
                 basePrice += 150;
+                break;
+            case '1TB':
+                basePrice += 200;
                 break;
             default:
                 console.error(`Unknown storage option: ${storage}`);

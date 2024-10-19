@@ -16,6 +16,7 @@ import FAQ from "./FAQ.js";
 import _ from 'lodash'; 
 import OrderTracking from './OrderTracking.js';
 import SellMultipleDevicesPage from "./SellMultipleDevicesPage.js";
+import Contact from './Contact.js';
 
 
 
@@ -26,6 +27,8 @@ function HomePage (){
   const tableRef = useRef(null);
   const navigate = useNavigate();
   const searchBar = useRef(null);
+  const devCard = useRef(null);
+
 
 
     // Debounced search
@@ -41,6 +44,9 @@ function HomePage (){
       navigate("/sell-multiple")
     }
 
+    const handleOrderTracking = (e) => {
+      navigate("/order-tracking")
+    }
   //db
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BACKEND_API}/phones`)
@@ -76,38 +82,7 @@ function HomePage (){
   return (
     <div className="app">
       <div className='intro-header shadow'>
-        <img src='/phones/kindpng_2768230.png' className=''></img>
-
-      <div className='container-sm py-5'>
-      <button className='shadow btn btn-primary btn-lg sell-btn'
-        onClick={() =>
-          searchBar.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-          })
-        }
-      >
-        Sell your device
-      </button>
-      <h2 className=' py-2'></h2>
-
-      <button className='shadow btn btn-light btn-lg sell-btn' onClick={handleSellMultiple}>
-        Sell multiple devices
-      </button>
-
-
-
-      </div>
-      <div className='sliderContainer'>
-      <PhoneGrid  data={data} isSliding={true} offsetClass={"offset-1"} />
-    </div>
-
-
-      <div className="title-container"  ref={tableRef}>
-        <h2> </h2>
-        <h1 className="text-light">Sell your Apple device today</h1>
-        <p className='text-white'>Make the most out of your old device and <br></br> make some money whilst you're at it</p>
-      </div>
+      <img src='/phones/kindpng_2768230.png' className='phoneCluster phoneCluster3'></img>
       <div className="search-container shadow ">
         <input
           type="text"
@@ -119,10 +94,11 @@ function HomePage (){
         <button className="search-button">Search</button>
       </div>
 
-      {showTable && (
-    
 
-    <Table striped bordered hover className='shadow specialTable'>
+      {showTable && (
+        
+        
+        <Table striped bordered hover className='shadow specialTable table-phone'>
       <thead>
         <tr>
         </tr>
@@ -146,6 +122,42 @@ function HomePage (){
       </tbody>
     </Table>
           )}
+
+      <div className='container-sm py-5 callContainer'>
+
+      <div className="title-container"  ref={tableRef}>
+        <h2> </h2>
+        <h1 className="text-light">Sell your Apple device today</h1>
+        <p className='text-white'>Make the most out of your old device and <br></br> make some money whilst you're at it</p>
+      </div>
+
+
+        <div className='m-0 d-inline-grid'>
+
+
+      <button className='shadow btn btn-primary btn-lg sell-btn'
+        onClick={() =>
+          devCard.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          })
+        }
+        >
+        
+        Sell your device
+      </button>
+      <h2 className=' py-2'></h2>
+
+      <button className='shadow btn btn-light btn-lg sell-btn' onClick={handleSellMultiple}>
+        Sell multiple devices
+      </button>
+
+      <button className='shadow btn btn-orderTrack btn-lg sell-btn mt-5' onClick={handleOrderTracking}>
+        Order Tracking
+      </button>
+      </div>
+
+      </div>
         
       </div>
 
@@ -164,6 +176,7 @@ function HomePage (){
           src="https://ee.co.uk/medias/iphone-13-5g-pink-desktop-detail-1-WebP-Format-488?context=bWFzdGVyfHJvb3R8ODIyMHxpbWFnZS93ZWJwfHN5cy1tYXN0ZXIvcm9vdC9oODUvaGVhLzk4ODg4ODYyNTk3NDIvaXBob25lLTEzLTVnLXBpbmstZGVza3RvcC1kZXRhaWwtMV9XZWJQLUZvcm1hdC00ODh8YmQ5NmZmZTQyMjgwNmE3NTE3ZTczMzQ4ZmEzMWE1YTcxZTYzNjk5N2FiNTljNmZkYmVlZWQ3NmI5YjViZWFkNw"
           className="card-img-top"
           alt="iPhone"
+          ref={devCard}
           />
         <div className="card-title">
           <h3 className="text-center">iPhone</h3>
@@ -199,7 +212,12 @@ function HomePage (){
 
     </div>
 
+    <div className='sliderContainer'>
+      <PhoneGrid  data={data} isSliding={true} offsetClass={"offset-1"} />
     </div>
+    <img src='/phones/kindpng_2768230.png' className='phoneCluster phoneCluster2'></img>
+    </div>
+    
     
   );
 }
@@ -223,6 +241,7 @@ function App() {
         <Route  path='/FAQ' element={<FAQ/>} />
         <Route path='/order-tracking' element={<OrderTracking />} />
         <Route path='/sell-multiple' element={<SellMultipleDevicesPage />} />
+        <Route path='/contact' element={<Contact></Contact>}></Route>
         </Route>
         <Route  path='/adminlogin' element={<AdminLogin/>} />
         <Route  path='/adminpage' element={<AdminPage/>} />
